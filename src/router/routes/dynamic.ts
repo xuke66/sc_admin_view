@@ -72,51 +72,9 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 		meta: {
 			title: "工作台",
 			icon: Compass,
-			isAffix: true,
 			tagText: "Welcome",
 			tagProps: { type: "success" },
 		},
-	},
-	{
-		path: "/system",
-		name: "系统管理",
-		meta: {
-			title: "系统管理",
-			icon: SetUp,
-			alwaysShowRoot: true,
-		},
-		children: [
-			{
-				path: "/system/admin",
-				name: "管理员管理",
-				component: "/system/admin/index",
-				meta: {
-					title: "管理员管理",
-					icon: User,
-					auths: ["system:admin:view", "system:admin:create", "system:admin:edit", "system:admin:status", "system:admin:del"],
-				},
-			},
-			{
-				path: "/system/permission",
-				name: "权限管理",
-				component: "/system/permission/index",
-				meta: {
-					title: "权限管理",
-					icon: Lock,
-					auths: ["system:permission:view", "system:permission:create", "system:permission:edit", "system:permission:del"],
-				},
-			},
-			{
-				path: "/system/permission-group",
-				name: "权限组",
-				component: "/system/permission-group/index",
-				meta: {
-					title: "权限组",
-					icon: Lock,
-					auths: ["system:permission-group:view", "system:permission-group:create", "system:permission-group:edit", "system:permission-group:del", "system:permission-group:status"],
-				},
-			},
-		],
 	},
 	{
 		path: "/shop",

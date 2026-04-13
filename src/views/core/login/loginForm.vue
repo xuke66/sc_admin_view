@@ -67,7 +67,7 @@ const login = () => {
       else router.push({ path, query: otherQuery });
 
       ElNotification.success({
-        title: `欢迎登录 ${result.data.nickname}`,
+        title: `欢迎登录 ${result.user.nickname}`,
         message: "",
         duration: 3000,
       });

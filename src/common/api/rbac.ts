@@ -6,6 +6,11 @@ export const RbacService = {
 		1: "启用",
 	}),
 
+	async getMenuList(): Promise<RouterConfigRaw[]> {
+        const res = await http.get<httpNs.Response>("/index/menu");
+        return res.data;
+	},
+
 	async getAdminList(param: any) {
 		return http.get<httpNs.Response>("/admin/index", param);
 	},
