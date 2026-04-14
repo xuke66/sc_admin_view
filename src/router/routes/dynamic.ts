@@ -78,7 +78,7 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 	},
 	{
 		path: "/shop",
-		name: "ShopParent",
+		name: "商品管理",
 		redirect: "/shop/goods",
 		meta: {
 			title: "商品管理",
@@ -88,29 +88,33 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 		children: [
 			{
 				path: "/shop/category",
-				name: "ShopCategory",
+				name: "分类管理",
 				component: "/shop/category/index",
 				meta: {
 					title: "分类管理",
 					icon: Goods,
-					roles: ["admin"],
 					auths: ["shop:category:view", "shop:category:create", "shop:category:edit", "shop:category:delete", "shop:category:status"],
 				},
 			},
 			{
 				path: "/shop/shipping-template",
-				name: "ShopShippingTemplate",
+				name: "运费模板",
 				component: "/shop/shipping-template/index",
 				meta: {
 					title: "运费模板",
 					icon: Goods,
-					roles: ["admin"],
-					auths: ["shop:shipping-template:view", "shop:shipping-template:create", "shop:shipping-template:edit", "shop:shipping-template:delete", "shop:shipping-template:status"],
+					auths: [
+						"shop:shipping-template:view",
+						"shop:shipping-template:create",
+						"shop:shipping-template:edit",
+						"shop:shipping-template:delete",
+						"shop:shipping-template:status",
+					],
 				},
 			},
 			{
 				path: "/shop/goods",
-				name: "ShopGoods",
+				name: "商品管理",
 				component: "/shop/goods/index",
 				meta: {
 					title: "商品管理",
