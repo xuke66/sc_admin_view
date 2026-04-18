@@ -1,4 +1,4 @@
-import { Compass, Goods } from "@element-plus/icons-vue";
+import { Compass, Goods, User } from "@element-plus/icons-vue";
 import { HOME_NAME, HOME_URL } from "@/common/config";
 
 export const dynamicRoutes: RouterConfigRaw[] = [
@@ -12,6 +12,28 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 			tagText: "Welcome",
 			tagProps: { type: "success" },
 		},
+	},
+	{
+		path: "/user",
+		name: "会员管理",
+		redirect: "/user/member",
+		meta: {
+			title: "会员管理",
+			icon: User,
+			alwaysShowRoot: true,
+		},
+		children: [
+			{
+				path: "/user/member",
+				name: "会员列表",
+				component: "/user/member/index",
+				meta: {
+					title: "会员列表",
+					icon: User,
+					auths: ["user:member:view", "user:member:detail", "user:member:edit", "user:member:account", "user:member:logs"],
+				},
+			},
+		],
 	},
 	{
 		path: "/shop",
@@ -67,6 +89,40 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 					title: "商品服务",
 					icon: Goods,
 					auths: ["shop:goods-service:view", "shop:goods-service:create", "shop:goods-service:edit", "shop:goods-service:delete"],
+				},
+			},
+			{
+				path: "/shop/goods-score",
+				name: "积分商品",
+				component: "/shop/goods-score/index",
+				meta: {
+					title: "积分商品",
+					icon: Goods,
+					auths: [
+						"shop:goods-score:view",
+						"shop:goods-score:create",
+						"shop:goods-score:edit",
+						"shop:goods-score:delete",
+						"shop:goods-score:status",
+					],
+				},
+			},
+			{
+				path: "/shop/coupon",
+				name: "优惠券管理",
+				component: "/shop/coupon/index",
+				meta: {
+					title: "优惠券管理",
+					icon: Goods,
+					auths: [
+						"shop:coupon:view",
+						"shop:coupon:create",
+						"shop:coupon:edit",
+						"shop:coupon:delete",
+						"shop:coupon:status",
+						"shop:coupon:grant",
+						"shop:coupon:records",
+					],
 				},
 			},
 		],
