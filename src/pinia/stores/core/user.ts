@@ -24,7 +24,7 @@ export const useUserStore = defineStore(
 			return await UserService.login(loginParams).then((res) => {
 				accessToken.value = res.data.token;
 				setToken(accessToken.value);
-                setUserInfo(res.data.user);
+				setUserInfo(res.data.user);
 				return res.data;
 			});
 		};
@@ -39,7 +39,7 @@ export const useUserStore = defineStore(
 
 			const layoutStore = useLayoutStore();
 			await layoutStore.removeAllTabs();
-            await layoutStore.setKeepAliveName();
+			await layoutStore.setKeepAliveName();
 			resetRouter();
 		};
 
@@ -51,10 +51,13 @@ export const useUserStore = defineStore(
 			accessToken.value = newAccessToken;
 		};
 
+		const getToken = () => {
+			return accessToken.value;
+		};
+
 		const setUserInfo = (userInfoParam: UserInfo) => {
 			userInfo.value = userInfoParam;
 		};
-
 
 		return {
 			accessToken,
@@ -67,6 +70,7 @@ export const useUserStore = defineStore(
 			clearPermission,
 			setUserInfo,
 			setToken,
+			getToken,
 		};
 	},
 	{
