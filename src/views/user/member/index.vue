@@ -30,7 +30,7 @@
 
 			<el-table v-loading="loading" :data="memberList" border>
 				<el-table-column prop="id" label="ID" width="90" align="center" />
-				<el-table-column label="会员信息" min-width="240" align="center">
+				<el-table-column label="会员信息" align="center">
 					<template #default="{ row }">
 						<div class="member-cell">
 							<el-avatar :src="row.avatar || undefined" :size="44">
@@ -43,9 +43,9 @@
 						</div>
 					</template>
 				</el-table-column>
-				<el-table-column prop="parent_user_name" label="推荐人" min-width="140" align="center" />
-				<el-table-column prop="money" label="余额" width="110" align="center" />
-				<el-table-column prop="score" label="积分" width="100" align="center" />
+				<el-table-column prop="parent_user_name" label="推荐人" align="center" />
+				<el-table-column prop="money" label="余额"  align="center" />
+				<el-table-column prop="score" label="积分"  align="center" />
 				<el-table-column prop="total_consume" label="累计消费" width="120" align="center" />
 				<el-table-column prop="create_time" label="注册时间" min-width="160" align="center" />
 				<el-table-column label="状态" width="110" align="center">

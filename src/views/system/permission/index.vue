@@ -13,7 +13,7 @@
 				</div>
 			</template>
 
-			<el-table v-loading="loading" :data="permissionList" row-key="id" default-expand-all border>
+			<el-table v-loading="loading" :data="permissionList" row-key="id" border>
 				<el-table-column prop="title" label="菜单/权限名称" min-width="180">
 					<template #default="{ row }">
 						<Icon v-if="row.icon" :icon="row.icon" :class="`${ns.elNamespace}-icon`" />

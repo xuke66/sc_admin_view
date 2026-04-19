@@ -116,4 +116,20 @@ export const ShopService = {
 	async getCouponRecords(id: number, params?: Record<string, any>) {
 		return http.get<httpNs.Response>("/coupon/records", { id, ...(params || {}) });
 	},
+
+	async getGoodsCommentList(params?: Record<string, any>) {
+		return http.get<httpNs.Response>("/goodsComment/index", params || {});
+	},
+
+	async replyGoodsComment(param: { id: number; reply_content: string }) {
+		return http.post<httpNs.Response>("/goodsComment/reply", param);
+	},
+
+	async updateGoodsCommentStatus(id: number, status: 0 | 1) {
+		return http.post<httpNs.Response>("/goodsComment/status", { id, status });
+	},
+
+	async delGoodsComment(id: number) {
+		return http.post<httpNs.Response>("/goodsComment/del", { id });
+	},
 };
