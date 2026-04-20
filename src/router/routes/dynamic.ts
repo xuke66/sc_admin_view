@@ -1,4 +1,4 @@
-import { Compass, Goods, Tickets, User } from "@element-plus/icons-vue";
+import { Brush, Compass } from "@element-plus/icons-vue";
 import { HOME_NAME, HOME_URL } from "@/common/config";
 
 export const dynamicRoutes: RouterConfigRaw[] = [
@@ -12,5 +12,15 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 			tagText: "Welcome",
 			tagProps: { type: "success" },
 		},
-	}
+	},
+	{
+		path: "/shop/decorate/page",
+		name: "ShopDecoratePage",
+		component: "/shop/decorate/page/index",
+		meta: {
+			title: "DIY 首页",
+			icon: Brush,
+			auths: ["decoratePage/detail", "decoratePage/edit"],
+		},
+	},
 ];
