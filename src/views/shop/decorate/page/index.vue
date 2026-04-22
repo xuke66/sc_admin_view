@@ -64,6 +64,47 @@
 								<span>{{ item.name }}</span>
 							</div>
 						</div>
+						<div class="collapse-title">图文组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in imageItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addHomeComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
+						<div class="collapse-title">营销组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in marketingItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addHomeComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
+					</div>
+					<div v-else-if="pageType === 'user'" class="collapse-block">
+						<div class="collapse-title">会员组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in userItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addUserComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="left-icon">‹</div>
@@ -295,9 +336,237 @@
 										</div>
 										<div v-if="!component.data.goodsList.length" class="goods-empty">请选择商品</div>
 									</div>
+									<div
+										v-if="component.type === 'imageBlock'"
+										class="image-block-preview"
+										:style="{
+											height: `${component.style.height}px`,
+											borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+											borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+											borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+											borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+										}"
+									>
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<div v-else class="image-placeholder">请上传图片</div>
+									</div>
+									<div v-if="component.type === 'imageBanner'" class="image-banner-preview">
+										<div class="image-banner-wrap" :style="{ margin: `-${component.data.space / 2}px` }">
+											<div
+												class="banner-item"
+												:style="{
+													padding: `${component.data.space / 2}px`,
+													height: `${component.style.height - component.style.padding}px`,
+												}"
+											>
+												<div class="banner-main" :style="imageBannerRadiusStyle(component)">
+													<img v-if="component.data.list[0]?.type === 'image' && component.data.list[0]?.src" :src="assetUrl(component.data.list[0].src)" alt="" />
+													<video v-else-if="component.data.list[0]?.type === 'video' && component.data.list[0]?.src" :poster="assetUrl(component.data.list[0].poster)" muted></video>
+													<div v-else class="image-placeholder">请添加图片</div>
+												</div>
+												<div v-if="component.data.mode === 2 && component.data.list[1]" class="banner-right" :style="imageBannerRadiusStyle(component)">
+													<img v-if="component.data.list[1].type === 'image' && component.data.list[1].src" :src="assetUrl(component.data.list[1].src)" alt="" />
+													<video v-else-if="component.data.list[1].type === 'video' && component.data.list[1].src" :poster="assetUrl(component.data.list[1].poster)" muted></video>
+													<div v-else class="image-placeholder">请上传图片</div>
+												</div>
+												<div class="banner-indicator" :class="`indicator-${component.data.indicator}`">
+													<span></span><span></span><span></span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div v-if="component.type === 'titleBlock'" class="title-block-preview" :style="{ height: `${component.style.height}px` }">
+										<div
+											class="title-block-content"
+											:style="{
+												alignItems: component.data.location === 'center' ? 'center' : 'flex-start',
+												marginLeft: `${component.data.skew}px`,
+											}"
+										>
+											<div
+												class="title-block-title"
+												:style="{
+													fontSize: `${component.data.title.textFontSize}px`,
+													color: component.data.title.color,
+													fontWeight: component.data.title.other.includes('bold') ? 'bold' : '',
+													fontStyle: component.data.title.other.includes('italic') ? 'italic' : '',
+												}"
+											>
+												{{ component.data.title.text }}
+											</div>
+											<div
+												class="title-block-subtitle"
+												:style="{
+													fontSize: `${component.data.subtitle.textFontSize}px`,
+													color: component.data.subtitle.color,
+													fontWeight: component.data.subtitle.other.includes('bold') ? 'bold' : '',
+													fontStyle: component.data.subtitle.other.includes('italic') ? 'italic' : '',
+												}"
+											>
+												{{ component.data.subtitle.text }}
+											</div>
+										</div>
+										<img class="title-block-bg" :src="assetUrl(component.data.src)" alt="" />
+										<div v-if="component.data.more.show" class="title-block-more">更多<span>›</span></div>
+									</div>
+									<div v-if="component.type === 'imageCube'" class="image-cube-preview">
+										<div class="image-cube-wrap" :style="imageCubeWrapStyle(component)">
+											<div
+												v-for="(item, cubeIndex) in component.data.list"
+												:key="cubeIndex"
+												class="image-cube-preview-item"
+												:style="imageCubeItemStyle(component, item)"
+											>
+												<img v-if="item.src" :src="assetUrl(item.src)" alt="" :style="imageCubeImageStyle(component)" />
+												<div v-else class="image-placeholder" :style="imageCubeImageStyle(component)">请上传图片</div>
+											</div>
+										</div>
+										<div v-if="!component.data.list.length" class="goods-empty">请添加魔方区域</div>
+									</div>
+									<div v-if="component.type === 'videoPlayer'" class="video-player-preview" :style="{ height: `${component.style.height}px` }">
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<video v-else-if="component.data.videoUrl" controls>
+											<source :src="assetUrl(component.data.videoUrl)" />
+										</video>
+										<div v-else class="image-placeholder">请设置视频链接或封面</div>
+									</div>
+									<div v-if="component.type === 'lineBlock'" class="line-block-preview">
+										<div
+											class="line-block-line"
+											:style="{
+												borderBottomStyle: component.data.mode,
+												borderBottomColor: component.data.lineColor,
+											}"
+										></div>
+									</div>
+									<div v-if="component.type === 'hotzone'" class="hotzone-preview">
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<div v-else class="image-placeholder hotzone-empty">请上传热区图片</div>
+										<div
+											v-for="(item, hotIndex) in component.data.list"
+											:key="hotIndex"
+											class="hotzone-map-item"
+											:style="hotzonePreviewItemStyle(item)"
+										>
+											{{ item.name }}
+										</div>
+									</div>
+									<div v-if="component.type === 'coupon'" class="coupon-preview">
+										<div class="coupon-card-wrap" :class="`coupon-${component.data.mode}`" :style="{ margin: `-${component.data.space / 2}px` }">
+											<div
+												v-for="(coupon, couponIndex) in component.data.couponList"
+												:key="coupon.id"
+												class="coupon-item"
+												:style="{ width: couponWidth(component.data.mode), padding: `${component.data.space / 2}px` }"
+											>
+												<div v-if="component.data.mode !== 1 || couponIndex < 2" class="coupon-item-wrap" :style="couponItemStyle(component)">
+													<template v-if="component.data.mode === 1">
+														<div>
+															<div class="coupon-amount">{{ couponAmount(coupon) }}<span>{{ couponUnit(coupon) }}</span></div>
+															<div class="coupon-amount-text">{{ couponAmountText(coupon) }}</div>
+															<div class="coupon-time">有效期：{{ couponStartDate(coupon) }} 至 {{ couponEndDate(coupon) }}</div>
+														</div>
+														<div>
+															<div class="coupon-button" :style="couponButtonStyle(component)">立即领取</div>
+															<div class="coupon-stock">仅剩：{{ coupon.stock || 0 }}张</div>
+														</div>
+													</template>
+													<template v-else-if="component.data.mode === 2">
+														<div>
+															<div class="coupon-amount">{{ couponAmount(coupon) }}<span>{{ couponUnit(coupon) }}</span></div>
+															<div class="coupon-amount-text">{{ couponAmountText(coupon) }}</div>
+															<div class="coupon-stock">仅剩：{{ coupon.stock || 0 }}张</div>
+														</div>
+														<div class="coupon-button" :style="couponButtonStyle(component)">立即领取</div>
+													</template>
+													<template v-else>
+														<div class="coupon-amount">{{ couponAmount(coupon) }}<span>{{ couponUnit(coupon) }}</span></div>
+														<div class="coupon-amount-text">{{ couponAmountText(coupon) }}</div>
+														<div class="coupon-button" :style="couponButtonStyle(component)">立即领取</div>
+													</template>
+												</div>
+											</div>
+										</div>
+										<div v-if="!component.data.couponList.length" class="goods-empty">请选择优惠券</div>
+									</div>
+									<div v-if="component.type === 'scoreGoods'" class="score-goods-preview">
+										<div class="score-goods-wrap" :class="`score-goods-${component.data.mode}`" :style="{ margin: `-${component.data.space / 2}px` }">
+											<div
+												v-for="goods in component.data.goodsList"
+												:key="goods.id"
+												class="score-goods-item"
+												:style="{ width: component.data.mode === 1 ? '50%' : '100%', padding: `${component.data.space / 2}px` }"
+											>
+												<div
+													class="score-goods-inner"
+													:style="{
+														borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+														borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+														borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+														borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+													}"
+												>
+													<img v-if="goods.image" class="score-goods-image" :src="assetUrl(goods.image)" alt="" />
+													<div v-else class="score-goods-image goods-image-empty">暂无图片</div>
+													<div class="score-goods-desc">
+														<div>
+															<div v-if="component.data.goodsFields.title.show" class="score-goods-title" :style="{ color: component.data.goodsFields.title.color }">{{ goods.title }}</div>
+															<div v-if="component.data.goodsFields.subtitle.show" class="score-goods-subtitle" :style="{ color: component.data.goodsFields.subtitle.color }">{{ goods.subtitle }}</div>
+														</div>
+														<div>
+															<div v-if="component.data.goodsFields.score_price.show" class="score-goods-score" :style="{ color: component.data.goodsFields.score_price.color }">
+																<span v-if="Number(goods.score_price.price)">￥{{ formatGoodsPrice(goods.score_price.price) }}+</span>
+																<img src="/assets/decorate/score.png" alt="" />
+																{{ goods.score_price.score }}
+															</div>
+															<s v-if="component.data.goodsFields.price.show" class="score-goods-price" :style="{ color: component.data.goodsFields.price.color }">￥{{ formatGoodsPrice(goods.original_price) }}</s>
+															<div class="score-goods-sales">已售{{ goods.sales || 0 }} | 库存{{ goods.stock || 0 }}</div>
+														</div>
+														<div class="score-goods-button" :style="scoreGoodsButtonStyle(component)">
+															<span v-if="component.data.buyNowStyle.mode === 1">{{ component.data.buyNowStyle.text }}</span>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div v-if="!component.data.goodsList.length" class="goods-empty">请选择积分商品</div>
+									</div>
 								</div>
 							</div>
 							<div v-if="!homeComponents.length" class="empty-tip">从左侧添加组件</div>
+						</template>
+						<template v-if="pageType === 'user'">
+							<div
+								v-for="(component, index) in userComponents"
+								:key="component.id"
+								class="home-component"
+								:class="{ 'is-active': currentUserIndex === index }"
+								@click="selectUserComponent(index)"
+							>
+								<div class="comp-label">{{ componentLabel(component.type) }}</div>
+								<div class="comp-tools">
+									<button type="button" title="上移" :disabled="index === 0" @click.stop="moveUserComponent(index, -1)">↑</button>
+									<button type="button" title="下移" :disabled="index === userComponents.length - 1" @click.stop="moveUserComponent(index, 1)">↓</button>
+									<button type="button" title="复制" @click.stop="copyUserComponent(index)">⧉</button>
+									<button type="button" title="删除" :disabled="component.type === 'userCard'" @click.stop="removeUserComponent(index)">×</button>
+								</div>
+								<div class="component-inner" :style="componentWrapStyle(component)">
+									<div v-if="component.type === 'userCard'" class="user-card-preview">
+										<div class="user-card-main">
+											<img class="user-card-avatar" src="/assets/decorate/avatar.png" alt="" />
+											<div class="user-card-info">
+												<div class="user-card-name">杨柳依依</div>
+												<img class="user-card-qrcode" src="/assets/decorate/qrcode.png" alt="" />
+											</div>
+										</div>
+										<div class="user-card-mobile">
+											<div>点击绑定手机号</div>
+											<div class="user-card-mobile-button">去绑定</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="!userComponents.length" class="empty-tip">从左侧添加组件</div>
 						</template>
 					</div>
 				</div>
@@ -1020,6 +1289,896 @@
 						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
 					</template>
 
+					<template v-else-if="currentType === 'imageBlock' && selectedHomeComponent?.type === 'imageBlock'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">添加图片</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">上传图片</div>
+										<label class="upload-box wide-upload image-upload">
+											<img v-if="selectedHomeComponent.data.src" :src="assetUrl(selectedHomeComponent.data.src)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadImageBlock($event, selectedHomeComponent)" />
+										</label>
+										<span class="tip">建议宽度：750</span>
+									</div>
+									<div class="form-item">
+										<div class="form-label">链接</div>
+										<el-input v-model="selectedHomeComponent.data.url" placeholder="请选择或输入链接" />
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">显示设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">高度</div>
+										<el-slider v-model="selectedHomeComponent.style.height" :min="60" :max="500" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">上圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusTop" :min="0" :max="60" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">下圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusBottom" :min="0" :max="60" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'imageBanner' && selectedHomeComponent?.type === 'imageBanner'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">样式设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">选择样式</div>
+										<el-radio-group v-model="selectedHomeComponent.data.mode" class="radio-row">
+											<el-radio :label="1">单图</el-radio>
+											<el-radio :label="2">错位</el-radio>
+										</el-radio-group>
+									</div>
+									<div class="form-item">
+										<div class="form-label">Dot样式</div>
+										<el-radio-group v-model="selectedHomeComponent.data.indicator" class="radio-row">
+											<el-radio :label="1">圆点</el-radio>
+											<el-radio :label="2">短线</el-radio>
+										</el-radio-group>
+									</div>
+									<div class="form-item">
+										<div class="form-label">间距</div>
+										<el-slider v-model="selectedHomeComponent.data.space" :min="0" :max="40" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">是否轮播</div>
+										<el-switch v-model="selectedHomeComponent.data.autoplay" />
+									</div>
+									<div v-if="selectedHomeComponent.data.autoplay" class="form-item">
+										<div class="form-label">时间间隔</div>
+										<el-input v-model="selectedHomeComponent.data.interval">
+											<template #append>ms</template>
+										</el-input>
+									</div>
+									<div class="form-item">
+										<div class="form-label">高度</div>
+										<el-slider v-model="selectedHomeComponent.style.height" :min="60" :max="500" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">上圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusTop" :min="0" :max="60" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">下圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusBottom" :min="0" :max="60" class="form-slider" />
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">图片上传</div>
+								<div class="wrap">
+									<div v-for="(item, index) in selectedHomeComponent.data.list" :key="index" class="list-card">
+										<div class="list-move">
+											<span>图片 {{ index + 1 }}</span>
+											<button class="delete-button" type="button" @click="removeImageBannerItem(index)">删除</button>
+										</div>
+										<div class="form-item">
+											<div class="form-label">标题</div>
+											<el-input v-model="item.title" placeholder="请输入标题" />
+										</div>
+										<div class="form-item">
+											<div class="form-label">选择类型</div>
+											<el-radio-group v-model="item.type" class="radio-row">
+												<el-radio label="image">图片</el-radio>
+												<el-radio label="video">视频</el-radio>
+											</el-radio-group>
+										</div>
+										<div class="form-item">
+											<div class="form-label">上传</div>
+											<label class="upload-box wide-upload image-upload">
+												<img v-if="item.type === 'image' && item.src" :src="assetUrl(item.src)" alt="" />
+												<span v-else>{{ item.type === 'video' && item.src ? '已上传' : '上传' }}</span>
+												<input :accept="item.type === 'video' ? 'video/*' : 'image/*'" type="file" @change="uploadImageBannerFile($event, item, 'src')" />
+											</label>
+										</div>
+										<div v-if="item.type === 'video'" class="form-item">
+											<div class="form-label">视频封面</div>
+											<label class="upload-box wide-upload image-upload">
+												<img v-if="item.poster" :src="assetUrl(item.poster)" alt="" />
+												<span v-else>上传</span>
+												<input type="file" accept="image/*" @change="uploadImageBannerFile($event, item, 'poster')" />
+											</label>
+										</div>
+										<div class="form-item">
+											<div class="form-label">链接</div>
+											<el-input v-model="item.url" placeholder="请选择或输入链接" />
+										</div>
+									</div>
+									<button class="add-button" type="button" @click="addImageBannerItem">+ 添加</button>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'titleBlock' && selectedHomeComponent?.type === 'titleBlock'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">选择风格 <span class="tip">建议尺寸：750*80</span></div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">背景图片</div>
+										<label class="upload-box title-block-upload">
+											<img v-if="selectedHomeComponent.data.src" :src="assetUrl(selectedHomeComponent.data.src)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadTitleBlockImage($event, selectedHomeComponent)" />
+										</label>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">显示设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">位置</div>
+										<el-radio-group v-model="selectedHomeComponent.data.location" class="radio-row">
+											<el-radio label="left">居左</el-radio>
+											<el-radio label="center">居中</el-radio>
+										</el-radio-group>
+									</div>
+									<div class="form-item">
+										<div class="form-label">偏移</div>
+										<el-input-number v-model="selectedHomeComponent.data.skew" :min="-120" :max="120" controls-position="right" />
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">标题设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">文字</div>
+										<div class="text-color-input">
+											<input v-model="selectedHomeComponent.data.title.text" class="text-input" placeholder="请输入文字" />
+											<el-color-picker v-model="selectedHomeComponent.data.title.color" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-label">字号</div>
+										<el-slider v-model="selectedHomeComponent.data.title.textFontSize" :min="10" :max="30" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">其他</div>
+										<el-checkbox-group v-model="selectedHomeComponent.data.title.other">
+											<el-checkbox label="bold">加粗</el-checkbox>
+											<el-checkbox label="italic">倾斜</el-checkbox>
+										</el-checkbox-group>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">副标题设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">文字</div>
+										<div class="text-color-input">
+											<input v-model="selectedHomeComponent.data.subtitle.text" class="text-input" placeholder="请输入文字" />
+											<el-color-picker v-model="selectedHomeComponent.data.subtitle.color" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-label">字号</div>
+										<el-slider v-model="selectedHomeComponent.data.subtitle.textFontSize" :min="10" :max="24" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">其他</div>
+										<el-checkbox-group v-model="selectedHomeComponent.data.subtitle.other">
+											<el-checkbox label="bold">加粗</el-checkbox>
+											<el-checkbox label="italic">倾斜</el-checkbox>
+										</el-checkbox-group>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">更多设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">显示更多</div>
+										<el-radio-group v-model="selectedHomeComponent.data.more.show" class="radio-row">
+											<el-radio :label="0">不显示</el-radio>
+											<el-radio :label="1">显示</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.data.more.show" class="form-item">
+										<div class="form-label">链接</div>
+										<el-input v-model="selectedHomeComponent.data.more.url" placeholder="请选择或输入链接" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div class="form-item">
+										<div class="form-label">高度</div>
+										<el-slider v-model="selectedHomeComponent.style.height" :min="32" :max="120" class="form-slider" />
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'imageCube' && selectedHomeComponent?.type === 'imageCube'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">魔方样式 <span class="tip">每格尺寸：187*187</span></div>
+								<div class="wrap">
+									<div class="cube-editor">
+										<div class="cube-grid">
+											<button
+												v-for="cell in cubeCells"
+												:key="cell.key"
+												type="button"
+												class="cube-cell"
+												:class="{ 'is-draft': isCubeDraftCell(cell.row, cell.col), 'is-disabled': isCubeCellUsed(selectedHomeComponent, cell.row, cell.col) }"
+												@click="selectCubeCell(cell.row, cell.col)"
+												@mouseenter="hoverCubeCell(cell.row, cell.col)"
+											>
+												+
+											</button>
+											<button
+												v-for="(item, index) in selectedHomeComponent.data.list"
+												:key="index"
+												type="button"
+												class="cube-position-item"
+												:class="{ 'is-active': selectedHomeComponent.data.activeIndex === index }"
+												:style="cubeEditorItemStyle(item)"
+												@click.stop="selectCubePosition(index)"
+											>
+												{{ item.width }}*{{ item.height }}
+												<span @click.stop="removeImageCubeItem(index)">×</span>
+											</button>
+										</div>
+										<div class="tip">点击起始格和结束格创建区域，区域不能重叠</div>
+									</div>
+									<template v-if="currentImageCubeItem">
+										<div class="form-item">
+											<div class="form-label">上传图片</div>
+											<label class="upload-box">
+												<img v-if="currentImageCubeItem.src" :src="assetUrl(currentImageCubeItem.src)" alt="" />
+												<span v-else>上传</span>
+												<input type="file" accept="image/*" @change="uploadImageCubeItem($event, currentImageCubeItem)" />
+											</label>
+										</div>
+										<div class="form-item">
+											<div class="form-label">链接</div>
+											<el-input v-model="currentImageCubeItem.url" placeholder="请选择或输入链接" />
+										</div>
+									</template>
+									<div v-else class="panel-placeholder">请先添加或选择魔方区域</div>
+									<div class="form-item">
+										<div class="form-label">上圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusTop" :min="0" :max="60" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">下圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusBottom" :min="0" :max="60" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">间距</div>
+										<el-slider v-model="selectedHomeComponent.data.space" :min="0" :max="40" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'videoPlayer' && selectedHomeComponent?.type === 'videoPlayer'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">内容设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">视频链接</div>
+										<el-input v-model="selectedHomeComponent.data.videoUrl" placeholder="请输入或上传视频">
+											<template #append>
+												<label class="input-upload-button">
+													选择
+													<input type="file" accept="video/*" @change="uploadVideoPlayerVideo($event, selectedHomeComponent)" />
+												</label>
+											</template>
+										</el-input>
+									</div>
+									<div class="form-item">
+										<div class="form-label">视频封面</div>
+										<label class="upload-box wide-upload image-upload">
+											<img v-if="selectedHomeComponent.data.src" :src="assetUrl(selectedHomeComponent.data.src)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadVideoPlayerPoster($event, selectedHomeComponent)" />
+										</label>
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div class="form-item">
+										<div class="form-label">高度</div>
+										<el-slider v-model="selectedHomeComponent.style.height" :min="100" :max="500" class="form-slider" />
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'lineBlock' && selectedHomeComponent?.type === 'lineBlock'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">内容设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">选择风格</div>
+										<el-radio-group v-model="selectedHomeComponent.data.mode" class="right-tab full-radio">
+											<el-radio-button label="solid">实线</el-radio-button>
+											<el-radio-button label="dotted">点线</el-radio-button>
+											<el-radio-button label="dashed">虚线</el-radio-button>
+										</el-radio-group>
+									</div>
+									<div class="form-item">
+										<div class="form-label">线条颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.data.lineColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.data.lineColor" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'hotzone' && selectedHomeComponent?.type === 'hotzone'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">添加图片</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">上传图片</div>
+										<label class="upload-box wide-upload image-upload">
+											<img v-if="selectedHomeComponent.data.src" :src="assetUrl(selectedHomeComponent.data.src)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHotzoneImage($event, selectedHomeComponent)" />
+										</label>
+										<span class="tip">建议宽度：750</span>
+									</div>
+									<button v-if="selectedHomeComponent.data.src" class="add-button inline-button" type="button" @click="openHotzoneDialog(selectedHomeComponent)">设置热区</button>
+									<div v-if="selectedHomeComponent.data.list.length" class="hotzone-list">
+										<div v-for="(item, index) in selectedHomeComponent.data.list" :key="index" class="hotzone-list-item">
+											<span>{{ item.name || `热区 ${index + 1}` }}</span>
+											<button class="delete-button" type="button" @click="removeHotzoneItem(index)">删除</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'coupon' && selectedHomeComponent?.type === 'coupon'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">优惠券选择</div>
+								<div class="wrap">
+									<div class="selected-goods selected-coupons">
+										<div v-for="(coupon, index) in selectedHomeComponent.data.couponList" :key="coupon.id" class="selected-goods-item selected-coupon-item">
+											<div>
+												<div class="selected-coupon-name">{{ coupon.name }}</div>
+												<div class="selected-coupon-desc">{{ couponAmountText(coupon) }}</div>
+											</div>
+											<button class="delete-button" type="button" @click="removeCouponItem(index)">删除</button>
+										</div>
+										<div v-if="!selectedHomeComponent.data.couponList.length" class="selected-empty">请选择优惠券</div>
+									</div>
+									<button class="add-button inline-button" type="button" @click="openCouponPicker">添加</button>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">优惠券样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">选择风格</div>
+										<el-radio-group v-model="selectedHomeComponent.data.mode" class="right-tab full-radio">
+											<el-radio-button :label="1">风格一</el-radio-button>
+											<el-radio-button :label="2">风格二</el-radio-button>
+											<el-radio-button :label="3">风格三</el-radio-button>
+										</el-radio-group>
+									</div>
+									<div class="form-item">
+										<div class="form-label">背景图片</div>
+										<label class="upload-box wide-upload image-upload">
+											<img v-if="selectedHomeComponent.data.fill.bgImage" :src="assetUrl(selectedHomeComponent.data.fill.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadCouponBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div class="form-item">
+										<div class="form-label">文字颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.data.fill.color" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.data.fill.color" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-label">按钮背景</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.data.button.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.data.button.bgColor" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-label">按钮文字</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.data.button.color" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.data.button.color" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-label">间距</div>
+										<el-slider v-model="selectedHomeComponent.data.space" :min="0" :max="30" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'scoreGoods' && selectedHomeComponent?.type === 'scoreGoods'">
+						<template v-if="activeTab === 'data'">
+							<div class="card">
+								<div class="title">选择积分商品</div>
+								<div class="wrap">
+									<div class="selected-goods">
+										<div v-for="goods in selectedHomeComponent.data.goodsList" :key="goods.id" class="selected-goods-item">
+											<img v-if="goods.image" :src="assetUrl(goods.image)" alt="" />
+											<div v-else class="selected-goods-empty"></div>
+											<span>{{ goods.title }}</span>
+											<button class="delete-button" type="button" @click="removeScoreGoodsItem(goods.id)">删除</button>
+										</div>
+										<div v-if="!selectedHomeComponent.data.goodsList.length" class="selected-empty">请选择积分商品</div>
+									</div>
+									<button class="add-button inline-button" type="button" @click="openScoreGoodsPicker">添加</button>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">商品样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">选择风格</div>
+										<el-radio-group v-model="selectedHomeComponent.data.mode" class="right-tab full-radio">
+											<el-radio-button :label="1">双列</el-radio-button>
+											<el-radio-button :label="2">单列</el-radio-button>
+										</el-radio-group>
+									</div>
+									<div v-for="field in scoreGoodsFieldList" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-switch v-model="selectedHomeComponent.data.goodsFields[field.key].show" :active-value="1" :inactive-value="0" />
+										<div class="color-input compact-color">
+											<el-color-picker v-model="selectedHomeComponent.data.goodsFields[field.key].color" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.data.goodsFields[field.key].color" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">加购设置</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">加购按钮</div>
+										<el-radio-group v-model="selectedHomeComponent.data.buyNowStyle.mode" class="radio-row">
+											<el-radio :label="1">文字</el-radio>
+											<el-radio :label="2">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<template v-if="selectedHomeComponent.data.buyNowStyle.mode === 1">
+										<div class="form-item">
+											<div class="form-label">文字</div>
+											<el-input v-model="selectedHomeComponent.data.buyNowStyle.text" />
+										</div>
+										<div class="form-item">
+											<div class="form-label">背景1</div>
+											<div class="color-input">
+												<el-color-picker v-model="selectedHomeComponent.data.buyNowStyle.color1" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+												<el-input v-model="selectedHomeComponent.data.buyNowStyle.color1" />
+											</div>
+										</div>
+										<div class="form-item">
+											<div class="form-label">背景2</div>
+											<div class="color-input">
+												<el-color-picker v-model="selectedHomeComponent.data.buyNowStyle.color2" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+												<el-input v-model="selectedHomeComponent.data.buyNowStyle.color2" />
+											</div>
+										</div>
+									</template>
+									<div v-if="selectedHomeComponent.data.buyNowStyle.mode === 2" class="form-item">
+										<div class="form-label">图片</div>
+										<label class="upload-box">
+											<img v-if="selectedHomeComponent.data.buyNowStyle.src" :src="assetUrl(selectedHomeComponent.data.buyNowStyle.src)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadScoreGoodsButton($event, selectedHomeComponent)" />
+										</label>
+										<span class="tip">建议尺寸：56*56</span>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="title">样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">上圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusTop" :min="0" :max="32" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">下圆角</div>
+										<el-slider v-model="selectedHomeComponent.data.borderRadiusBottom" :min="0" :max="32" class="form-slider" />
+									</div>
+									<div class="form-item">
+										<div class="form-label">间距</div>
+										<el-slider v-model="selectedHomeComponent.data.space" :min="0" :max="30" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<template v-else-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedHomeComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedHomeComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedHomeComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedHomeComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedHomeComponent.style.background.bgImage" :src="assetUrl(selectedHomeComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadHomeBackground($event, selectedHomeComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedHomeComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
+					</template>
+
+					<template v-else-if="currentType === 'userCard' && selectedUserComponent?.type === 'userCard'">
+						<template v-if="activeTab === 'style'">
+							<div class="card">
+								<div class="title">组件样式</div>
+								<div class="wrap">
+									<div class="form-item">
+										<div class="form-label">组件背景</div>
+										<el-radio-group v-model="selectedUserComponent.style.background.type" class="radio-row">
+											<el-radio label="color">纯色</el-radio>
+											<el-radio label="image">图片</el-radio>
+										</el-radio-group>
+									</div>
+									<div v-if="selectedUserComponent.style.background.type === 'color'" class="form-item">
+										<div class="form-label">选择颜色</div>
+										<div class="color-input">
+											<el-color-picker v-model="selectedUserComponent.style.background.bgColor" append-to=".right-main" popper-class="decorate-color-picker-popper" />
+											<el-input v-model="selectedUserComponent.style.background.bgColor" />
+										</div>
+									</div>
+									<div v-if="selectedUserComponent.style.background.type === 'image'" class="form-item">
+										<div class="form-label">选择图片</div>
+										<label class="upload-box wide-upload">
+											<img v-if="selectedUserComponent.style.background.bgImage" :src="assetUrl(selectedUserComponent.style.background.bgImage)" alt="" />
+											<span v-else>上传</span>
+											<input type="file" accept="image/*" @change="uploadUserBackground($event, selectedUserComponent)" />
+										</label>
+									</div>
+									<div v-for="field in styleSliderFields" :key="field.key" class="form-item">
+										<div class="form-label">{{ field.label }}</div>
+										<el-slider v-model="selectedUserComponent.style[field.key]" :min="0" :max="field.max" class="form-slider" />
+									</div>
+								</div>
+							</div>
+						</template>
+						<pre v-else class="css-card">{{ JSON.stringify(selectedUserComponent, null, 2) }}</pre>
+					</template>
+
 					<template v-else-if="currentType === 'goodsCard' && selectedHomeComponent?.type === 'goodsCard'">
 						<template v-if="activeTab === 'data'">
 							<div class="card">
@@ -1321,11 +2480,112 @@
 				<el-button type="primary" @click="confirmGoodsPicker">确定</el-button>
 			</template>
 		</el-dialog>
+		<el-dialog v-model="couponPickerVisible" title="选择优惠券" width="760px" destroy-on-close>
+			<div class="dialog-toolbar">
+				<el-input v-model="couponPickerKeyword" clearable placeholder="请输入优惠券名称" style="width: 220px" />
+				<el-button type="primary" @click="loadCouponOptions">查询</el-button>
+			</div>
+			<el-table v-loading="couponPickerLoading" :data="filteredCouponOptions" border @selection-change="handleCouponPickerSelection">
+				<el-table-column type="selection" width="60" align="center" />
+				<el-table-column prop="name" label="优惠券名称" min-width="220" />
+				<el-table-column label="优惠内容" width="160" align="center">
+					<template #default="{ row }">{{ couponAmountText(row) }}</template>
+				</el-table-column>
+				<el-table-column prop="stock" label="库存" width="100" align="center" />
+				<el-table-column label="领取时间" width="210" align="center">
+					<template #default="{ row }">{{ couponStartDate(row) }} 至 {{ couponEndDate(row) }}</template>
+				</el-table-column>
+			</el-table>
+			<template #footer>
+				<el-button @click="couponPickerVisible = false">取消</el-button>
+				<el-button type="primary" @click="confirmCouponPicker">确定</el-button>
+			</template>
+		</el-dialog>
+		<el-dialog v-model="scoreGoodsPickerVisible" title="选择积分商品" width="780px" destroy-on-close>
+			<div class="dialog-toolbar">
+				<el-input v-model="scoreGoodsPickerKeyword" clearable placeholder="请输入积分商品名称" style="width: 220px" />
+				<el-button type="primary" @click="loadScoreGoodsOptions">查询</el-button>
+			</div>
+			<el-table v-loading="scoreGoodsPickerLoading" :data="filteredScoreGoodsOptions" border @selection-change="handleScoreGoodsPickerSelection">
+				<el-table-column type="selection" width="60" align="center" />
+				<el-table-column label="图片" width="90" align="center">
+					<template #default="{ row }">
+						<el-image v-if="row.image" :src="assetUrl(row.image)" fit="cover" class="goods-thumb" :preview-src-list="[assetUrl(row.image)]" preview-teleported />
+						<div v-else class="goods-thumb goods-thumb--empty">暂无图片</div>
+					</template>
+				</el-table-column>
+				<el-table-column prop="title" label="名称" min-width="220" />
+				<el-table-column label="兑换" width="150" align="center">
+					<template #default="{ row }">
+						<span v-if="Number(row.score_price.price)">￥{{ formatGoodsPrice(row.score_price.price) }}+</span>{{ row.score_price.score }}积分
+					</template>
+				</el-table-column>
+				<el-table-column prop="stock" label="库存" width="90" align="center" />
+			</el-table>
+			<template #footer>
+				<el-button @click="scoreGoodsPickerVisible = false">取消</el-button>
+				<el-button type="primary" @click="confirmScoreGoodsPicker">确定</el-button>
+			</template>
+		</el-dialog>
+		<el-dialog v-model="hotzoneDialogVisible" class="hotzone-dialog" title="设置热区" width="1080px" destroy-on-close>
+			<div v-if="selectedHotzoneComponent" class="hotzone-dialog-body">
+				<div ref="hotzoneMapRef" class="hotzone-map-content">
+					<img v-if="selectedHotzoneComponent.data.src" :src="assetUrl(selectedHotzoneComponent.data.src)" alt="" />
+					<div
+						v-for="(item, index) in selectedHotzoneComponent.data.list"
+						:key="index"
+						class="hotzone-edit-item"
+						:class="{ 'is-active': selectedHotzoneComponent.data.activeIndex === index }"
+						:style="hotzoneDialogItemStyle(item)"
+						@click="selectHotzoneItem(index)"
+						@mousedown.prevent="startHotzonePointer($event, index, 'move')"
+					>
+						{{ item.name }}
+						<button type="button" class="hotzone-delete" @mousedown.stop @click.stop="removeHotzoneItem(index)">×</button>
+						<span class="hotzone-resize" @mousedown.stop.prevent="startHotzonePointer($event, index, 'resize')"></span>
+					</div>
+				</div>
+				<div class="hotzone-editor-panel">
+					<button class="add-button" type="button" @click="addHotzoneItem">添加热区</button>
+					<template v-if="currentHotzoneItem">
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">名称</div>
+							<el-input v-model="currentHotzoneItem.name" />
+						</div>
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">宽</div>
+							<el-input-number v-model="currentHotzoneItem.width" :min="20" :max="750" :controls="false" />
+						</div>
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">高</div>
+							<el-input-number v-model="currentHotzoneItem.height" :min="20" :max="1200" :controls="false" />
+						</div>
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">左</div>
+							<el-input-number v-model="currentHotzoneItem.left" :min="0" :max="730" :controls="false" />
+						</div>
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">上</div>
+							<el-input-number v-model="currentHotzoneItem.top" :min="0" :max="1200" :controls="false" />
+						</div>
+						<div class="form-item hotzone-field-item">
+							<div class="form-label">链接</div>
+							<el-input v-model="currentHotzoneItem.url" placeholder="请选择或输入链接" />
+						</div>
+					</template>
+					<div v-else class="panel-placeholder">请添加或选择热区</div>
+				</div>
+			</div>
+			<template #footer>
+				<el-button @click="hotzoneDialogVisible = false">取消</el-button>
+				<el-button type="primary" @click="saveHotzoneDialog">保存</el-button>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
 <script setup lang="ts" name="ShopDecoratePage">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useUserStore } from "@/pinia";
 import { ShopService } from "@/common/api/shop";
 
@@ -1345,7 +2605,24 @@ const goodsItems = [
 	{ name: "商品卡片", type: "goodsCard" },
 	{ name: "商品栏", type: "goodsShelves" },
 ];
+const imageItems = [
+	{ name: "图片展示", type: "imageBlock" },
+	{ name: "图片轮播", type: "imageBanner" },
+	{ name: "标题栏", type: "titleBlock" },
+	{ name: "广告魔方", type: "imageCube" },
+	{ name: "视频播放", type: "videoPlayer" },
+	{ name: "辅助线", type: "lineBlock" },
+	{ name: "热区", type: "hotzone" },
+];
+const marketingItems = [
+	{ name: "积分商城", type: "scoreGoods" },
+	{ name: "优惠券", type: "coupon" },
+];
+const userItems = [
+	{ name: "会员卡片", type: "userCard" },
+];
 const noticeImages = ["/assets/decorate/notice/1.png", "/assets/decorate/notice/2.png", "/assets/decorate/notice/3.png"];
+const titleBlockImages = ["/assets/decorate/title/1.png"];
 const styleSliderFields: { key: keyof Pick<ComponentStyle, "marginTop" | "marginRight" | "marginBottom" | "marginLeft" | "borderRadiusTop" | "borderRadiusBottom" | "padding">; label: string; max: number }[] = [
 	{ key: "marginTop", label: "上间距", max: 60 },
 	{ key: "marginRight", label: "右间距", max: 60 },
@@ -1359,7 +2636,11 @@ const styleSliderFields: { key: keyof Pick<ComponentStyle, "marginTop" | "margin
 const pageType = ref<"basic" | "home" | "user">("basic");
 const currentType = ref("");
 const currentTitle = computed(() => {
-	const items = pageType.value === "home" ? [...homeItems, ...goodsItems] : basicItems;
+	const items = pageType.value === "home"
+		? [...homeItems, ...goodsItems, ...imageItems, ...marketingItems]
+		: pageType.value === "user"
+			? userItems
+			: basicItems;
 	return items.find(item => item.type === currentType.value)?.name || "页面设置";
 });
 const activeTab = ref<"data" | "style" | "css">("data");
@@ -1374,6 +2655,16 @@ const componentTabs = reactive<Record<string, "data" | "style" | "css">>({
 	menuGrid: "data",
 	goodsCard: "data",
 	goodsShelves: "data",
+	imageBlock: "data",
+	imageBanner: "data",
+	titleBlock: "data",
+	imageCube: "data",
+	videoPlayer: "data",
+	lineBlock: "data",
+	hotzone: "data",
+	scoreGoods: "data",
+	coupon: "data",
+	userCard: "style",
 });
 const goodsFieldList: { key: keyof GoodsCardFields; label: string }[] = [
 	{ key: "title", label: "商品标题" },
@@ -1387,8 +2678,21 @@ const goodsShelvesFieldList: { key: keyof GoodsShelvesFields; label: string }[] 
 	{ key: "title", label: "商品标题" },
 	{ key: "price", label: "商品价格" },
 ];
+const scoreGoodsFieldList: { key: keyof ScoreGoodsFields; label: string }[] = [
+	{ key: "title", label: "商品标题" },
+	{ key: "subtitle", label: "副标题" },
+	{ key: "score_price", label: "兑换颜色" },
+	{ key: "price", label: "原价" },
+];
+const cubeCells = Array.from({ length: 16 }, (_, index) => ({
+	row: Math.floor(index / 4) + 1,
+	col: (index % 4) + 1,
+	key: index,
+}));
 const userStore = useUserStore();
 const floatMenuFolded = ref(false);
+const cubeDraftStart = ref<{ row: number; col: number } | null>(null);
+const cubeDraftHover = ref<{ row: number; col: number } | null>(null);
 
 type TabbarItem = {
 	inactiveIcon: string;
@@ -1537,6 +2841,142 @@ type ComponentStyle = {
 	borderRadiusTop: number;
 	borderRadiusBottom: number;
 	padding: number;
+	height: number;
+};
+
+type ImageBlockComponent = {
+	id: number;
+	type: "imageBlock";
+	data: {
+		src: string;
+		url: string;
+		borderRadiusTop: number;
+		borderRadiusBottom: number;
+	};
+	style: ComponentStyle;
+};
+
+type ImageBannerItem = {
+	title: string;
+	type: "image" | "video";
+	src: string;
+	poster: string;
+	url: string;
+};
+
+type ImageBannerComponent = {
+	id: number;
+	type: "imageBanner";
+	data: {
+		mode: number;
+		indicator: number;
+		autoplay: boolean;
+		interval: number;
+		list: ImageBannerItem[];
+		space: number;
+		borderRadiusTop: number;
+		borderRadiusBottom: number;
+	};
+	style: ComponentStyle;
+};
+
+type TitleTextConfig = {
+	text: string;
+	color: string;
+	textFontSize: number;
+	other: string[];
+};
+
+type TitleBlockComponent = {
+	id: number;
+	type: "titleBlock";
+	data: {
+		src: string;
+		location: "left" | "center";
+		skew: number;
+		title: TitleTextConfig;
+		subtitle: TitleTextConfig;
+		more: {
+			show: number;
+			url: string;
+		};
+	};
+	style: ComponentStyle;
+};
+
+type ImageCubeItem = {
+	width: number;
+	height: number;
+	top: number;
+	left: number;
+	src: string;
+	url: string;
+};
+
+type ImageCubeComponent = {
+	id: number;
+	type: "imageCube";
+	data: {
+		borderRadiusTop: number;
+		borderRadiusBottom: number;
+		space: number;
+		activeIndex: number;
+		list: ImageCubeItem[];
+	};
+	style: ComponentStyle;
+};
+
+type VideoPlayerComponent = {
+	id: number;
+	type: "videoPlayer";
+	data: {
+		videoUrl: string;
+		src: string;
+	};
+	style: ComponentStyle;
+};
+
+type LineBlockComponent = {
+	id: number;
+	type: "lineBlock";
+	data: {
+		mode: "solid" | "dotted" | "dashed";
+		lineColor: string;
+	};
+	style: ComponentStyle;
+};
+
+type HotzoneItem = {
+	width: number;
+	height: number;
+	top: number;
+	left: number;
+	name: string;
+	url: string;
+};
+
+type HotzoneComponent = {
+	id: number;
+	type: "hotzone";
+	data: {
+		src: string;
+		activeIndex: number;
+		list: HotzoneItem[];
+	};
+	style: ComponentStyle;
+};
+
+type HotzonePointerMode = "move" | "resize";
+
+type HotzonePointerState = {
+	mode: HotzonePointerMode;
+	index: number;
+	startX: number;
+	startY: number;
+	left: number;
+	top: number;
+	width: number;
+	height: number;
 };
 
 type GoodsOption = {
@@ -1615,9 +3055,90 @@ type GoodsShelvesComponent = {
 	style: ComponentStyle;
 };
 
-type GoodsComponent = GoodsCardComponent | GoodsShelvesComponent;
+type CouponOption = {
+	id: number;
+	name: string;
+	type: number | string;
+	amount: number | string;
+	amount_text?: string;
+	enough?: number | string;
+	stock?: number | string;
+	get_start_time?: string;
+	get_end_time?: string;
+	start_time?: string;
+	end_time?: string;
+	use_start_time?: string;
+	use_end_time?: string;
+};
 
-type HomeComponent = SearchBlockComponent | NoticeBlockComponent | MenuButtonComponent | MenuListComponent | MenuGridComponent | GoodsCardComponent | GoodsShelvesComponent;
+type CouponComponent = {
+	id: number;
+	type: "coupon";
+	data: {
+		couponIds: number[];
+		couponList: CouponOption[];
+		mode: 1 | 2 | 3;
+		fill: {
+			color: string;
+			bgImage: string;
+		};
+		button: {
+			color: string;
+			bgColor: string;
+		};
+		space: number;
+	};
+	style: ComponentStyle;
+};
+
+type ScoreGoodsOption = Omit<GoodsOption, "price"> & {
+	price: number | string;
+	score_price: {
+		price: number | string;
+		score: number | string;
+	};
+};
+
+type ScoreGoodsFields = {
+	title: GoodsCardField;
+	subtitle: GoodsCardField;
+	score_price: GoodsCardField;
+	price: GoodsCardField;
+};
+
+type ScoreGoodsComponent = {
+	id: number;
+	type: "scoreGoods";
+	data: {
+		goodsIds: number[];
+		goodsList: ScoreGoodsOption[];
+		mode: 1 | 2;
+		goodsFields: ScoreGoodsFields;
+		buyNowStyle: {
+			mode: number;
+			text: string;
+			color1: string;
+			color2: string;
+			src: string;
+		};
+		borderRadiusTop: number;
+		borderRadiusBottom: number;
+		space: number;
+	};
+	style: ComponentStyle;
+};
+
+type UserCardComponent = {
+	id: number;
+	type: "userCard";
+	style: ComponentStyle;
+};
+
+type GoodsComponent = GoodsCardComponent | GoodsShelvesComponent;
+type UserComponent = UserCardComponent;
+
+type HomeComponent = SearchBlockComponent | NoticeBlockComponent | MenuButtonComponent | MenuListComponent | MenuGridComponent | GoodsCardComponent | GoodsShelvesComponent | ImageBlockComponent | ImageBannerComponent | TitleBlockComponent | ImageCubeComponent | VideoPlayerComponent | LineBlockComponent | HotzoneComponent | ScoreGoodsComponent | CouponComponent;
+type DecorateComponent = HomeComponent | UserComponent;
 
 const tabbar = reactive({
 	mode: 1,
@@ -1652,20 +3173,59 @@ const popupImage = reactive({
 const popupImageCurrent = ref(-1);
 const homeComponents = reactive<HomeComponent[]>([]);
 const currentHomeIndex = ref(-1);
+const userComponents = reactive<UserComponent[]>([]);
+const currentUserIndex = ref(-1);
 const goodsPickerVisible = ref(false);
 const goodsPickerLoading = ref(false);
 const goodsPickerKeyword = ref("");
 const goodsOptions = ref<GoodsOption[]>([]);
 const goodsPickerSelection = ref<GoodsOption[]>([]);
+const couponPickerVisible = ref(false);
+const couponPickerLoading = ref(false);
+const couponPickerKeyword = ref("");
+const couponOptions = ref<CouponOption[]>([]);
+const couponPickerSelection = ref<CouponOption[]>([]);
+const scoreGoodsPickerVisible = ref(false);
+const scoreGoodsPickerLoading = ref(false);
+const scoreGoodsPickerKeyword = ref("");
+const scoreGoodsOptions = ref<ScoreGoodsOption[]>([]);
+const scoreGoodsPickerSelection = ref<ScoreGoodsOption[]>([]);
+const hotzoneDialogVisible = ref(false);
+const selectedHotzoneComponent = ref<HotzoneComponent | null>(null);
+const hotzoneMapRef = ref<HTMLElement | null>(null);
+let hotzonePointerState: HotzonePointerState | null = null;
 let componentId = 1;
 
 const selectedHomeComponent = computed(() => {
 	return homeComponents[currentHomeIndex.value];
 });
+const selectedUserComponent = computed(() => {
+	return userComponents[currentUserIndex.value];
+});
+const currentImageCubeItem = computed(() => {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageCube") return null;
+	return component.data.list[component.data.activeIndex] || null;
+});
+const currentHotzoneItem = computed(() => {
+	const component = selectedHotzoneComponent.value;
+	if (!component) return null;
+	return component.data.list[component.data.activeIndex] || null;
+});
 const filteredGoodsOptions = computed(() => {
 	const keyword = goodsPickerKeyword.value.trim().toLowerCase();
 	if (!keyword) return goodsOptions.value;
 	return goodsOptions.value.filter(item => item.title.toLowerCase().includes(keyword));
+});
+const filteredCouponOptions = computed(() => {
+	const keyword = couponPickerKeyword.value.trim().toLowerCase();
+	if (!keyword) return couponOptions.value;
+	return couponOptions.value.filter(item => item.name.toLowerCase().includes(keyword));
+});
+const filteredScoreGoodsOptions = computed(() => {
+	const keyword = scoreGoodsPickerKeyword.value.trim().toLowerCase();
+	if (!keyword) return scoreGoodsOptions.value;
+	return scoreGoodsOptions.value.filter(item => item.title.toLowerCase().includes(keyword));
 });
 
 function changePageType(type: "basic" | "home" | "user") {
@@ -1678,9 +3238,16 @@ function changePageType(type: "basic" | "home" | "user") {
 	if (type === "home") {
 		const component = selectedHomeComponent.value;
 		currentType.value = component?.type || "";
+		activeTab.value = currentType.value ? normalizeTab(currentType.value, componentTabs[currentType.value] || "data") : "data";
 		return;
 	}
-	currentType.value = "";
+	if (!userComponents.length) {
+		userComponents.push(createUserCard());
+		currentUserIndex.value = 0;
+	}
+	const component = selectedUserComponent.value;
+	currentType.value = component?.type || "";
+	activeTab.value = currentType.value ? normalizeTab(currentType.value, componentTabs[currentType.value] || "style") : "style";
 }
 
 function selectBasicItem(type: string) {
@@ -1694,6 +3261,7 @@ function selectBasicItem(type: string) {
 
 function availableTabs(type: string) {
 	if (!type) return ["data", "css"];
+	if (type === "userCard") return ["style", "css"];
 	return ["floatMenu", "popupImage"].includes(type) ? ["data", "css"] : ["data", "style", "css"];
 }
 
@@ -1738,6 +3306,7 @@ function createComponentStyle(): ComponentStyle {
 		borderRadiusTop: 0,
 		borderRadiusBottom: 0,
 		padding: 0,
+		height: 160,
 	};
 }
 
@@ -1904,6 +3473,192 @@ function createGoodsShelves(): GoodsShelvesComponent {
 	};
 }
 
+function createImageBlock(): ImageBlockComponent {
+	const style = createComponentStyle();
+	style.height = 160;
+	return {
+		id: componentId++,
+		type: "imageBlock",
+		data: {
+			src: "",
+			url: "",
+			borderRadiusTop: 0,
+			borderRadiusBottom: 0,
+		},
+		style,
+	};
+}
+
+function createImageBannerItem(): ImageBannerItem {
+	return {
+		title: "",
+		type: "image",
+		src: "",
+		poster: "",
+		url: "",
+	};
+}
+
+function createImageBanner(): ImageBannerComponent {
+	const style = createComponentStyle();
+	style.height = 160;
+	return {
+		id: componentId++,
+		type: "imageBanner",
+		data: {
+			mode: 1,
+			indicator: 1,
+			autoplay: false,
+			interval: 3000,
+			list: [createImageBannerItem()],
+			space: 0,
+			borderRadiusTop: 0,
+			borderRadiusBottom: 0,
+		},
+		style,
+	};
+}
+
+function createTitleBlock(): TitleBlockComponent {
+	const style = createComponentStyle();
+	style.height = 40;
+	style.marginBottom = 0;
+	return {
+		id: componentId++,
+		type: "titleBlock",
+		data: {
+			src: titleBlockImages[0],
+			location: "left",
+			skew: 0,
+			title: {
+				text: "标题栏",
+				color: "#111111",
+				textFontSize: 14,
+				other: [],
+			},
+			subtitle: {
+				text: "副标题",
+				color: "#8c8c8c",
+				textFontSize: 12,
+				other: [],
+			},
+			more: {
+				show: 0,
+				url: "",
+			},
+		},
+		style,
+	};
+}
+
+function createImageCube(): ImageCubeComponent {
+	const style = createComponentStyle();
+	return {
+		id: componentId++,
+		type: "imageCube",
+		data: {
+			borderRadiusTop: 0,
+			borderRadiusBottom: 0,
+			space: 0,
+			activeIndex: -1,
+			list: [],
+		},
+		style,
+	};
+}
+
+function createVideoPlayer(): VideoPlayerComponent {
+	const style = createComponentStyle();
+	style.height = 300;
+	return {
+		id: componentId++,
+		type: "videoPlayer",
+		data: {
+			videoUrl: "",
+			src: "",
+		},
+		style,
+	};
+}
+
+function createLineBlock(): LineBlockComponent {
+	return {
+		id: componentId++,
+		type: "lineBlock",
+		data: {
+			mode: "solid",
+			lineColor: "#eeeeee",
+		},
+		style: createComponentStyle(),
+	};
+}
+
+function createHotzone(): HotzoneComponent {
+	return {
+		id: componentId++,
+		type: "hotzone",
+		data: {
+			src: "",
+			activeIndex: -1,
+			list: [],
+		},
+		style: createComponentStyle(),
+	};
+}
+
+function createCoupon(): CouponComponent {
+	return {
+		id: componentId++,
+		type: "coupon",
+		data: {
+			couponIds: [],
+			couponList: [],
+			mode: 1,
+			fill: {
+				color: "#ffffff",
+				bgImage: "",
+			},
+			button: {
+				color: "#ff6000",
+				bgColor: "#ffffff",
+			},
+			space: 0,
+		},
+		style: createComponentStyle(),
+	};
+}
+
+function createScoreGoods(): ScoreGoodsComponent {
+	const style = createComponentStyle();
+	style.background.bgColor = "#FFFFFF";
+	return {
+		id: componentId++,
+		type: "scoreGoods",
+		data: {
+			goodsIds: [],
+			goodsList: [],
+			mode: 1,
+			goodsFields: {
+				title: { show: 1, color: "#333333" },
+				subtitle: { show: 1, color: "#999999" },
+				score_price: { show: 1, color: "#ff3000" },
+				price: { show: 1, color: "#c4c4c4" },
+			},
+			buyNowStyle: {
+				mode: 1,
+				text: "去兑换",
+				color1: "#ff6000",
+				color2: "#fe8c00",
+				src: "",
+			},
+			borderRadiusTop: 0,
+			borderRadiusBottom: 0,
+			space: 0,
+		},
+		style,
+	};
+}
+
 function addHomeComponent(type: string) {
 	const componentMap: Record<string, () => HomeComponent> = {
 		searchBlock: createSearchBlock,
@@ -1913,6 +3668,15 @@ function addHomeComponent(type: string) {
 		menuGrid: createMenuGrid,
 		goodsCard: createGoodsCard,
 		goodsShelves: createGoodsShelves,
+		imageBlock: createImageBlock,
+		imageBanner: createImageBanner,
+		titleBlock: createTitleBlock,
+		imageCube: createImageCube,
+		videoPlayer: createVideoPlayer,
+		lineBlock: createLineBlock,
+		hotzone: createHotzone,
+		scoreGoods: createScoreGoods,
+		coupon: createCoupon,
 	};
 	const component = componentMap[type]?.();
 	if (!component) return;
@@ -1959,7 +3723,7 @@ function removeHomeComponent(index: number) {
 }
 
 function componentLabel(type: string) {
-	return homeItems.find(item => item.type === type)?.name || type;
+	return [...homeItems, ...goodsItems, ...imageItems].find(item => item.type === type)?.name || type;
 }
 
 function componentWrapStyle(component: HomeComponent) {
@@ -1983,6 +3747,120 @@ function goodsShelvesWidth(mode: number) {
 	return "32%";
 }
 
+function imageBannerRadiusStyle(component: HomeComponent) {
+	const data = (component as ImageBannerComponent).data;
+	return {
+		borderTopLeftRadius: `${data.borderRadiusTop}px`,
+		borderTopRightRadius: `${data.borderRadiusTop}px`,
+		borderBottomLeftRadius: `${data.borderRadiusBottom}px`,
+		borderBottomRightRadius: `${data.borderRadiusBottom}px`,
+	};
+}
+
+function imageCubeScale(component: ImageCubeComponent) {
+	return (375 - component.style.marginLeft - component.style.marginRight - component.style.padding * 2 + component.data.space) / 4;
+}
+
+function imageCubeWrapStyle(component: ImageCubeComponent) {
+	const item = component.data.list.reduce<ImageCubeItem | null>((prev, next) => {
+		if (!prev) return next;
+		const prevBottom = prev.top + prev.height;
+		const nextBottom = next.top + next.height;
+		return nextBottom > prevBottom ? next : prev;
+	}, null);
+	const bottom = item ? item.top + item.height : 0;
+	return {
+		margin: `-${component.data.space / 2}px`,
+		height: `${Math.max(bottom * imageCubeScale(component), 30)}px`,
+		position: "relative",
+	};
+}
+
+function imageCubeItemStyle(component: ImageCubeComponent, item: ImageCubeItem) {
+	const scale = imageCubeScale(component);
+	return {
+		width: `${item.width * scale}px`,
+		height: `${item.height * scale}px`,
+		top: `${item.top * scale}px`,
+		left: `${item.left * scale}px`,
+		padding: `${component.data.space / 2}px`,
+	};
+}
+
+function imageCubeImageStyle(component: ImageCubeComponent) {
+	return {
+		borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+		borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+		borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+		borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+	};
+}
+
+function cubeEditorItemStyle(item: ImageCubeItem) {
+	const scale = 66;
+	return {
+		width: `${item.width * scale}px`,
+		height: `${item.height * scale}px`,
+		top: `${item.top * scale}px`,
+		left: `${item.left * scale}px`,
+	};
+}
+
+function isCubeCellUsed(component: ImageCubeComponent, row: number, col: number) {
+	const left = col - 1;
+	const top = row - 1;
+	return component.data.list.some(item => left >= item.left && left < item.left + item.width && top >= item.top && top < item.top + item.height);
+}
+
+function isCubeDraftCell(row: number, col: number) {
+	if (!cubeDraftStart.value || !cubeDraftHover.value) return false;
+	const minRow = Math.min(cubeDraftStart.value.row, cubeDraftHover.value.row);
+	const maxRow = Math.max(cubeDraftStart.value.row, cubeDraftHover.value.row);
+	const minCol = Math.min(cubeDraftStart.value.col, cubeDraftHover.value.col);
+	const maxCol = Math.max(cubeDraftStart.value.col, cubeDraftHover.value.col);
+	return row >= minRow && row <= maxRow && col >= minCol && col <= maxCol;
+}
+
+function hoverCubeCell(row: number, col: number) {
+	if (!cubeDraftStart.value) return;
+	cubeDraftHover.value = { row, col };
+}
+
+function hotzonePreviewItemStyle(item: HotzoneItem) {
+	return {
+		width: `${item.width / 2}px`,
+		height: `${item.height / 2}px`,
+		top: `${item.top / 2}px`,
+		left: `${item.left / 2}px`,
+	};
+}
+
+function hotzoneDialogItemStyle(item: HotzoneItem) {
+	return {
+		width: `${item.width}px`,
+		height: `${item.height}px`,
+		top: `${item.top}px`,
+		left: `${item.left}px`,
+	};
+}
+
+function hotzoneMapBounds() {
+	const map = hotzoneMapRef.value;
+	const image = map?.querySelector("img");
+	return {
+		width: 750,
+		height: Math.max(image?.clientHeight || map?.clientHeight || 0, 30),
+	};
+}
+
+function clampHotzoneItem(item: HotzoneItem) {
+	const bounds = hotzoneMapBounds();
+	item.width = Math.max(20, Math.min(Math.round(item.width), bounds.width));
+	item.height = Math.max(20, Math.min(Math.round(item.height), bounds.height || item.height));
+	item.left = Math.max(0, Math.min(Math.round(item.left), Math.max(0, bounds.width - item.width)));
+	item.top = Math.max(0, Math.min(Math.round(item.top), Math.max(0, bounds.height - item.height)));
+}
+
 function formatGoodsPrice(value: number | string = 0) {
 	const num = Number(Array.isArray(value) ? value[0] : value);
 	return Number.isFinite(num) ? num.toFixed(2) : "0.00";
@@ -1993,6 +3871,60 @@ function buyButtonStyle(component: GoodsCardComponent) {
 	return {
 		background: style.mode === 1 ? `linear-gradient(90deg, ${style.color1}, ${style.color2})` : "transparent",
 	};
+}
+
+function couponWidth(mode: number) {
+	return ({ 1: "90%", 2: "50%", 3: "33.333%" } as Record<number, string>)[mode] || "90%";
+}
+
+function couponItemStyle(component: CouponComponent) {
+	const image = component.data.fill.bgImage;
+	return {
+		color: component.data.fill.color || "#ffffff",
+		background: image ? `url("${assetUrl(image)}") center center / 100% 100% no-repeat` : "#ff6000",
+	};
+}
+
+function couponButtonStyle(component: CouponComponent) {
+	return {
+		color: component.data.button.color || "#ff6000",
+		background: component.data.button.bgColor || "#ffffff",
+	};
+}
+
+function scoreGoodsButtonStyle(component: ScoreGoodsComponent) {
+	const style = component.data.buyNowStyle;
+	return {
+		background: style.mode === 1
+			? `linear-gradient(90deg, ${style.color1}, ${style.color2})`
+			: style.src
+				? `url("${assetUrl(style.src)}") center center / 100% 100% no-repeat`
+				: "transparent",
+	};
+}
+
+function couponAmount(coupon: CouponOption) {
+	const value = Number(coupon.amount || 0);
+	if (couponUnit(coupon) === "折") return Number.isFinite(value) ? value.toFixed(0) : "0";
+	return Number.isFinite(value) ? String(value) : String(coupon.amount || 0);
+}
+
+function couponUnit(coupon: CouponOption) {
+	return coupon.type === "discount" || Number(coupon.type) === 2 ? "折" : "元";
+}
+
+function couponAmountText(coupon: CouponOption) {
+	if (coupon.amount_text) return coupon.amount_text;
+	const enough = Number(coupon.enough || 0);
+	return enough > 0 ? `满${enough}元可用` : "无门槛";
+}
+
+function couponStartDate(coupon: CouponOption) {
+	return String(coupon.get_start_time || coupon.start_time || coupon.use_start_time || "").split(" ")[0] || "-";
+}
+
+function couponEndDate(coupon: CouponOption) {
+	return String(coupon.get_end_time || coupon.end_time || coupon.use_end_time || "").split(" ")[0] || "-";
 }
 
 function assetUrl(src: string) {
@@ -2090,6 +4022,149 @@ function removeGoodsComponentGoods(id: number) {
 	removeGoodsFromComponent(component, id);
 }
 
+function addImageBannerItem() {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageBanner") return;
+	component.data.list.push(createImageBannerItem());
+}
+
+function removeImageBannerItem(index: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageBanner") return;
+	component.data.list.splice(index, 1);
+}
+
+function selectCubeCell(row: number, col: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageCube") return;
+	if (!cubeDraftStart.value) {
+		if (isCubeCellUsed(component, row, col)) return;
+		cubeDraftStart.value = { row, col };
+		cubeDraftHover.value = { row, col };
+		return;
+	}
+	const minRow = Math.min(cubeDraftStart.value.row, row);
+	const maxRow = Math.max(cubeDraftStart.value.row, row);
+	const minCol = Math.min(cubeDraftStart.value.col, col);
+	const maxCol = Math.max(cubeDraftStart.value.col, col);
+	const nextItem: ImageCubeItem = {
+		width: maxCol - minCol + 1,
+		height: maxRow - minRow + 1,
+		top: minRow - 1,
+		left: minCol - 1,
+		src: "",
+		url: "",
+	};
+	if (!component.data.list.some(item => isCubeOverlap(item, nextItem))) {
+		component.data.list.push(nextItem);
+		component.data.activeIndex = component.data.list.length - 1;
+	}
+	cubeDraftStart.value = null;
+	cubeDraftHover.value = null;
+}
+
+function isCubeOverlap(a: ImageCubeItem, b: ImageCubeItem) {
+	return !(a.left >= b.left + b.width || b.left >= a.left + a.width || a.top >= b.top + b.height || b.top >= a.top + a.height);
+}
+
+function selectCubePosition(index: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageCube") return;
+	component.data.activeIndex = index;
+	cubeDraftStart.value = null;
+	cubeDraftHover.value = null;
+}
+
+function removeImageCubeItem(index: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "imageCube") return;
+	component.data.list.splice(index, 1);
+	component.data.activeIndex = component.data.list.length ? Math.min(index, component.data.list.length - 1) : -1;
+}
+
+function openHotzoneDialog(component: HotzoneComponent) {
+	selectedHotzoneComponent.value = component;
+	if (component.data.activeIndex < 0 && component.data.list.length) component.data.activeIndex = 0;
+	hotzoneDialogVisible.value = true;
+}
+
+function addHotzoneItem() {
+	const component = selectedHotzoneComponent.value;
+	if (!component) return;
+	component.data.list.push({
+		width: 200,
+		height: 200,
+		top: 0,
+		left: 0,
+		name: "双击选择链接",
+		url: "",
+	});
+	component.data.activeIndex = component.data.list.length - 1;
+}
+
+function selectHotzoneItem(index: number) {
+	const component = selectedHotzoneComponent.value;
+	if (!component) return;
+	component.data.activeIndex = index;
+}
+
+function startHotzonePointer(event: MouseEvent, index: number, mode: HotzonePointerMode) {
+	const component = selectedHotzoneComponent.value;
+	const item = component?.data.list[index];
+	if (!component || !item) return;
+	component.data.activeIndex = index;
+	hotzonePointerState = {
+		mode,
+		index,
+		startX: event.clientX,
+		startY: event.clientY,
+		left: item.left,
+		top: item.top,
+		width: item.width,
+		height: item.height,
+	};
+	document.addEventListener("mousemove", moveHotzonePointer);
+	document.addEventListener("mouseup", stopHotzonePointer);
+}
+
+function moveHotzonePointer(event: MouseEvent) {
+	const state = hotzonePointerState;
+	const component = selectedHotzoneComponent.value;
+	const item = state && component?.data.list[state.index];
+	if (!state || !item) return;
+	const dx = event.clientX - state.startX;
+	const dy = event.clientY - state.startY;
+	if (state.mode === "move") {
+		item.left = state.left + dx;
+		item.top = state.top + dy;
+	} else {
+		item.width = state.width + dx;
+		item.height = state.height + dy;
+	}
+	clampHotzoneItem(item);
+}
+
+function stopHotzonePointer() {
+	hotzonePointerState = null;
+	document.removeEventListener("mousemove", moveHotzonePointer);
+	document.removeEventListener("mouseup", stopHotzonePointer);
+}
+
+function removeHotzoneItem(index: number) {
+	const component = selectedHotzoneComponent.value || (selectedHomeComponent.value?.type === "hotzone" ? selectedHomeComponent.value : null);
+	if (!component) return;
+	component.data.list.splice(index, 1);
+	component.data.activeIndex = component.data.list.length ? Math.min(index, component.data.list.length - 1) : -1;
+}
+
+function saveHotzoneDialog() {
+	hotzoneDialogVisible.value = false;
+}
+
+onBeforeUnmount(() => {
+	stopHotzonePointer();
+});
+
 function removeGoodsFromComponent(component: GoodsComponent, id: number) {
 	component.data.goodsList = component.data.goodsList.filter(item => item.id !== id);
 	component.data.goodsIds = component.data.goodsList.map(item => item.id);
@@ -2136,6 +4211,118 @@ function confirmGoodsPicker() {
 	component.data.goodsList = [...goodsPickerSelection.value];
 	component.data.goodsIds = component.data.goodsList.map(item => item.id);
 	goodsPickerVisible.value = false;
+}
+
+function removeCouponItem(index: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "coupon") return;
+	component.data.couponList.splice(index, 1);
+	component.data.couponIds = component.data.couponList.map(item => item.id);
+}
+
+async function openCouponPicker() {
+	couponPickerVisible.value = true;
+	const component = selectedHomeComponent.value;
+	couponPickerSelection.value = component?.type === "coupon" ? [...component.data.couponList] : [];
+	if (!couponOptions.value.length) await loadCouponOptions();
+}
+
+async function loadCouponOptions() {
+	couponPickerLoading.value = true;
+	try {
+		const res = await ShopService.getCouponList({ status: 1, keywords: couponPickerKeyword.value.trim() });
+		couponOptions.value = (res.data || []).map(mapCouponOption);
+	} finally {
+		couponPickerLoading.value = false;
+	}
+}
+
+function mapCouponOption(item: any): CouponOption {
+	return {
+		id: Number(item.id),
+		name: item.name || item.title || "",
+		type: item.type ?? 1,
+		amount: item.amount ?? item.value ?? 0,
+		amount_text: item.amount_text || item.description || "",
+		enough: item.enough ?? 0,
+		stock: item.stock ?? 0,
+		get_start_time: item.get_start_time || item.start_time || "",
+		get_end_time: item.get_end_time || item.end_time || "",
+		start_time: item.start_time || "",
+		end_time: item.end_time || "",
+		use_start_time: item.use_start_time || "",
+		use_end_time: item.use_end_time || "",
+	};
+}
+
+function handleCouponPickerSelection(rows: CouponOption[]) {
+	couponPickerSelection.value = rows;
+}
+
+function confirmCouponPicker() {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "coupon") return;
+	const couponMap = new Map<number, CouponOption>();
+	[...component.data.couponList, ...couponPickerSelection.value].forEach(item => couponMap.set(item.id, item));
+	component.data.couponList = Array.from(couponMap.values());
+	component.data.couponIds = component.data.couponList.map(item => item.id);
+	couponPickerVisible.value = false;
+}
+
+function removeScoreGoodsItem(id: number) {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "scoreGoods") return;
+	component.data.goodsList = component.data.goodsList.filter(item => item.id !== id);
+	component.data.goodsIds = component.data.goodsList.map(item => item.id);
+}
+
+async function openScoreGoodsPicker() {
+	scoreGoodsPickerVisible.value = true;
+	const component = selectedHomeComponent.value;
+	scoreGoodsPickerSelection.value = component?.type === "scoreGoods" ? [...component.data.goodsList] : [];
+	if (!scoreGoodsOptions.value.length) await loadScoreGoodsOptions();
+}
+
+async function loadScoreGoodsOptions() {
+	scoreGoodsPickerLoading.value = true;
+	try {
+		const res = await ShopService.getGoodsScoreList({ status: 1, keywords: scoreGoodsPickerKeyword.value.trim() });
+		scoreGoodsOptions.value = (res.data || []).map(mapScoreGoodsOption);
+	} finally {
+		scoreGoodsPickerLoading.value = false;
+	}
+}
+
+function mapScoreGoodsOption(item: any): ScoreGoodsOption {
+	const scorePrice = item.score_price || {};
+	return {
+		id: Number(item.id),
+		title: item.title || item.display_title || item.goods_title || item.name || "",
+		subtitle: item.subtitle || item.goods_subtitle || item.description || "",
+		image: item.image || item.goods_image || item.cover || item.main_image || "",
+		price: item.price ?? scorePrice.price ?? 0,
+		original_price: item.original_price ?? item.market_price ?? item.goods_original_price ?? 0,
+		sales: Number(item.sales || item.virtual_sales || 0),
+		stock: Number(item.stock || 0),
+		score_price: {
+			price: item.price ?? scorePrice.price ?? 0,
+			score: item.score ?? scorePrice.score ?? 0,
+		},
+	};
+}
+
+function handleScoreGoodsPickerSelection(rows: ScoreGoodsOption[]) {
+	scoreGoodsPickerSelection.value = rows;
+}
+
+function confirmScoreGoodsPicker() {
+	const component = selectedHomeComponent.value;
+	if (component?.type !== "scoreGoods") return;
+	const goodsMap = new Map<number, ScoreGoodsOption>();
+	[...component.data.goodsList, ...scoreGoodsPickerSelection.value].forEach(item => goodsMap.set(item.id, item));
+	component.data.goodsList = Array.from(goodsMap.values());
+	component.data.goodsIds = component.data.goodsList.map(item => item.id);
+	scoreGoodsPickerVisible.value = false;
 }
 
 async function uploadFile(file: File) {
@@ -2219,6 +4406,87 @@ async function uploadMenuGridImage(event: Event, item: MenuGridItem) {
 	if (!file) return;
 	const url = await uploadFile(file);
 	if (url) item.src = url;
+	input.value = "";
+}
+
+async function uploadImageBlock(event: Event, component: ImageBlockComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.src = url;
+	input.value = "";
+}
+
+async function uploadImageBannerFile(event: Event, item: ImageBannerItem, key: "src" | "poster") {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) item[key] = url;
+	input.value = "";
+}
+
+async function uploadTitleBlockImage(event: Event, component: TitleBlockComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.src = url;
+	input.value = "";
+}
+
+async function uploadImageCubeItem(event: Event, item: ImageCubeItem) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) item.src = url;
+	input.value = "";
+}
+
+async function uploadVideoPlayerVideo(event: Event, component: VideoPlayerComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.videoUrl = url;
+	input.value = "";
+}
+
+async function uploadVideoPlayerPoster(event: Event, component: VideoPlayerComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.src = url;
+	input.value = "";
+}
+
+async function uploadHotzoneImage(event: Event, component: HotzoneComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.src = url;
+	input.value = "";
+}
+
+async function uploadCouponBackground(event: Event, component: CouponComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.fill.bgImage = url;
+	input.value = "";
+}
+
+async function uploadScoreGoodsButton(event: Event, component: ScoreGoodsComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.data.buyNowStyle.src = url;
 	input.value = "";
 }
 
@@ -3066,6 +5334,481 @@ async function uploadBackgroundImage(event: Event) {
 	transform: translateX(6px);
 }
 
+.image-block-preview {
+	width: 100%;
+	overflow: hidden;
+}
+
+.image-block-preview img,
+.image-banner-preview img,
+.image-banner-preview video,
+.image-placeholder {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	object-fit: fill;
+	background: #fff;
+	color: var(--sa-subtitle);
+}
+
+.image-banner-preview {
+	height: fit-content;
+	overflow: hidden;
+}
+
+.image-banner-wrap {
+	position: relative;
+}
+
+.banner-item {
+	position: relative;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.banner-main,
+.banner-right {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: #fff;
+}
+
+.banner-right {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	width: 110px;
+	height: calc(100% - 70px);
+	transform: translateY(-50%);
+	box-shadow: 0 4px 14px rgb(0 0 0 / 14%);
+}
+
+.banner-indicator {
+	position: absolute;
+	left: 50%;
+	bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	transform: translateX(-50%);
+}
+
+.banner-indicator span {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: rgb(255 255 255 / 90%);
+	box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+}
+
+.banner-indicator.indicator-2 span {
+	width: 12px;
+	height: 3px;
+	border-radius: 3px;
+}
+
+.title-block-preview {
+	position: relative;
+	overflow: hidden;
+}
+
+.title-block-bg {
+	width: 100%;
+	height: 100%;
+	display: block;
+	object-fit: fill;
+}
+
+.title-block-content {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding-left: 12px;
+	pointer-events: none;
+}
+
+.title-block-title,
+.title-block-subtitle {
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.title-block-title {
+	margin-bottom: 6px;
+	line-height: 1;
+}
+
+.title-block-subtitle {
+	line-height: 1;
+}
+
+.title-block-more {
+	position: absolute;
+	top: 0;
+	right: 10px;
+	z-index: 3;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	color: #999;
+	font-size: 12px;
+}
+
+.title-block-more span {
+	margin-left: 2px;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.image-cube-preview {
+	position: relative;
+	overflow: hidden;
+}
+
+.image-cube-wrap {
+	position: relative;
+}
+
+.image-cube-preview-item {
+	position: absolute;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.image-cube-preview-item img {
+	width: 100%;
+	height: 100%;
+	display: block;
+	object-fit: cover;
+}
+
+.video-player-preview {
+	width: 100%;
+	background: #f3f3f3;
+	overflow: hidden;
+}
+
+.video-player-preview img,
+.video-player-preview video {
+	width: 100%;
+	height: 100%;
+	display: block;
+	object-fit: fill;
+}
+
+.line-block-preview {
+	height: 30px;
+	display: flex;
+	align-items: center;
+}
+
+.line-block-line {
+	width: 100%;
+	border-bottom-width: 1px;
+	border-bottom-color: #eee;
+}
+
+.hotzone-preview {
+	position: relative;
+	min-height: 30px;
+	overflow: hidden;
+}
+
+.hotzone-preview > img {
+	width: 100%;
+	display: block;
+	pointer-events: none;
+}
+
+.hotzone-empty {
+	height: 120px;
+}
+
+.hotzone-map-item,
+.hotzone-edit-item {
+	position: absolute;
+	border: 1px solid var(--el-color-primary);
+	background: var(--t-bg-active);
+	opacity: 0.82;
+	color: var(--el-color-primary);
+	font-size: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.hotzone-edit-item {
+	cursor: move;
+	user-select: none;
+}
+
+.hotzone-edit-item.is-active {
+	box-shadow: inset 0 0 0 1px var(--el-color-primary);
+	background: rgb(64 158 255 / 20%);
+}
+
+.coupon-preview {
+	position: relative;
+	overflow: hidden;
+}
+
+.coupon-card-wrap {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.coupon-1.coupon-card-wrap {
+	flex-wrap: nowrap;
+}
+
+.coupon-item {
+	box-sizing: border-box;
+	flex-shrink: 0;
+}
+
+.coupon-item-wrap {
+	width: 100%;
+	line-height: 1;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.coupon-1 .coupon-item-wrap {
+	height: 78px;
+	padding: 0 10px 0 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.coupon-2 .coupon-item-wrap {
+	height: 84px;
+	padding: 0 10px 0 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.coupon-3 .coupon-item-wrap {
+	height: 146px;
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.coupon-1 .coupon-amount {
+	font-size: 24px;
+}
+
+.coupon-2 .coupon-amount {
+	font-size: 18px;
+}
+
+.coupon-3 .coupon-amount {
+	margin-top: 24px;
+	font-size: 25px;
+	font-weight: 600;
+}
+
+.coupon-amount span {
+	margin-left: 2px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.coupon-amount-text {
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 6px;
+}
+
+.coupon-3 .coupon-amount-text {
+	width: 80px;
+	height: 36px;
+	line-height: 18px;
+	text-align: center;
+	margin-top: 10px;
+}
+
+.coupon-time {
+	font-size: 12px;
+	margin-top: 4px;
+	white-space: nowrap;
+	transform: scale(0.85);
+	transform-origin: left center;
+}
+
+.coupon-button {
+	text-align: center;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.coupon-1 .coupon-button,
+.coupon-3 .coupon-button {
+	height: 24px;
+	line-height: 24px;
+	padding: 0 10px;
+}
+
+.coupon-2 .coupon-button {
+	width: 20px;
+	height: fit-content;
+	padding: 4px 0;
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+}
+
+.coupon-3 .coupon-button {
+	margin-top: 5px;
+}
+
+.coupon-stock {
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 6px;
+}
+
+.coupon-1 .coupon-stock {
+	text-align: center;
+	margin-top: 12px;
+}
+
+.score-goods-preview {
+	position: relative;
+}
+
+.score-goods-wrap {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.score-goods-item {
+	box-sizing: border-box;
+	flex-shrink: 0;
+	height: fit-content;
+}
+
+.score-goods-inner {
+	position: relative;
+	overflow: hidden;
+	background: #fff;
+}
+
+.score-goods-2 .score-goods-inner {
+	display: flex;
+	height: 140px;
+}
+
+.score-goods-image {
+	width: 100%;
+	height: 140px;
+	display: block;
+	object-fit: cover;
+	background: #f2f3f5;
+}
+
+.score-goods-2 .score-goods-image {
+	width: 140px;
+	height: 140px;
+	flex-shrink: 0;
+}
+
+.score-goods-desc {
+	position: relative;
+	padding: 10px;
+	flex: 1;
+	font-size: 12px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.score-goods-title {
+	height: 18px;
+	line-height: 18px;
+	font-size: 14px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.score-goods-2 .score-goods-title {
+	white-space: normal;
+	height: 36px;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.score-goods-subtitle {
+	height: 17px;
+	line-height: 17px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.score-goods-score {
+	display: flex;
+	align-items: center;
+	margin-bottom: 4px;
+	font-weight: 600;
+}
+
+.score-goods-score img {
+	width: 18px;
+	height: 18px;
+	margin-right: 4px;
+}
+
+.score-goods-price {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.score-goods-sales {
+	color: #c4c4c4;
+}
+
+.score-goods-button {
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	min-width: 56px;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 8px;
+	border-radius: 12px;
+	color: #fff;
+	text-align: center;
+	font-size: 12px;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.score-goods-button:empty {
+	width: 28px;
+	min-width: 28px;
+	height: 28px;
+	padding: 0;
+	border-radius: 50%;
+}
+
 .goods-card-preview {
 	position: relative;
 }
@@ -3271,6 +6014,27 @@ async function uploadBackgroundImage(event: Event) {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.selected-coupon-item {
+	grid-template-columns: minmax(0, 1fr) 40px;
+}
+
+.selected-coupon-name,
+.selected-coupon-desc {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.selected-coupon-name {
+	color: var(--sa-font);
+}
+
+.selected-coupon-desc {
+	margin-top: 4px;
+	color: var(--sa-subtitle);
+	font-size: 12px;
 }
 
 .selected-empty {
@@ -3664,6 +6428,196 @@ async function uploadBackgroundImage(event: Event) {
 	object-fit: cover;
 }
 
+.title-block-upload {
+	width: 100%;
+	height: 34px;
+}
+
+.cube-editor {
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.cube-grid {
+	position: relative;
+	width: 264px;
+	height: 264px;
+	margin: 0 auto 8px;
+	display: grid;
+	grid-template-columns: repeat(4, 66px);
+	grid-template-rows: repeat(4, 66px);
+	border-top: 1px solid var(--sa-border);
+	border-left: 1px solid var(--sa-border);
+	background: #fff;
+}
+
+.cube-cell {
+	width: 66px;
+	height: 66px;
+	padding: 0;
+	border: none;
+	border-right: 1px solid var(--sa-border);
+	border-bottom: 1px solid var(--sa-border);
+	background: #fff;
+	color: #c0c4cc;
+	cursor: pointer;
+	font-size: 18px;
+	box-sizing: border-box;
+}
+
+.cube-cell.is-draft {
+	background: var(--t-bg-active);
+	color: var(--el-color-primary);
+}
+
+.cube-cell.is-disabled {
+	color: transparent;
+	cursor: not-allowed;
+	background: #f7f8fa;
+}
+
+.cube-position-item {
+	position: absolute;
+	z-index: 2;
+	padding: 0;
+	border: 1px solid var(--el-color-primary);
+	background: rgb(64 158 255 / 12%);
+	color: var(--el-color-primary);
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.cube-position-item.is-active {
+	background: rgb(64 158 255 / 20%);
+	box-shadow: inset 0 0 0 1px var(--el-color-primary);
+}
+
+.cube-position-item span {
+	position: absolute;
+	right: -7px;
+	top: -7px;
+	width: 14px;
+	height: 14px;
+	line-height: 13px;
+	border-radius: 50%;
+	background: #fff;
+	color: var(--el-color-primary);
+	border: 1px solid var(--el-color-primary);
+	font-size: 12px;
+}
+
+.input-upload-button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	height: 100%;
+	cursor: pointer;
+}
+
+.input-upload-button input {
+	display: none;
+}
+
+.hotzone-list {
+	width: 100%;
+}
+
+.hotzone-list-item {
+	height: 32px;
+	padding: 0 8px;
+	margin-bottom: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--sa-bg-assist-1);
+	border: 1px solid var(--sa-border);
+	border-radius: 2px;
+}
+
+.hotzone-dialog-body {
+	display: grid;
+	grid-template-columns: 1fr 260px;
+	gap: 16px;
+	align-items: start;
+}
+
+.hotzone-map-content {
+	position: relative;
+	width: 750px;
+	max-width: 100%;
+	min-height: 180px;
+	background: #f7f8fa;
+	overflow: auto;
+}
+
+.hotzone-map-content img {
+	width: 750px;
+	max-width: 100%;
+	display: block;
+	pointer-events: none;
+}
+
+.hotzone-editor-panel {
+	min-width: 0;
+}
+
+.hotzone-delete {
+	position: absolute;
+	top: -1px;
+	right: -1px;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: none;
+	border-radius: 0 0 0 12px;
+	background: var(--el-color-primary);
+	color: #fff;
+	cursor: pointer;
+	line-height: 16px;
+}
+
+.hotzone-field-item {
+	display: grid;
+	grid-template-columns: 52px minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+}
+
+.hotzone-field-item .form-label {
+	margin: 0;
+	width: 52px;
+	height: 32px;
+	line-height: 32px;
+	color: var(--sa-font);
+	text-align: right;
+	white-space: nowrap;
+}
+
+.hotzone-field-item :deep(.el-input),
+.hotzone-field-item :deep(.el-input-number) {
+	width: 100%;
+}
+
+.hotzone-field-item :deep(.el-input__wrapper) {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.hotzone-field-item :deep(.el-input-number .el-input__inner) {
+	text-align: left;
+}
+
+.hotzone-resize {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	width: 10px;
+	height: 10px;
+	background: var(--el-color-primary);
+	cursor: se-resize;
+}
 
 .tip {
 	margin-left: 8px;
