@@ -2,20 +2,19 @@
 	<div class="decorate-page page-index">
 		<div class="sa-header">
 			<div class="header-side">
-				<button class="header-button" :class="{ 'is-active': pageType === 'basic' }" type="button" title="基础配置" @click="changePageType('basic')">
+				<button v-if="!isDiypageTemplate" class="header-button" :class="{ 'is-active': pageType === 'basic' }" type="button" title="基础配置" @click="changePageType('basic')">
 					<span class="header-page-icon icon-basic"></span>
 				</button>
 				<button class="header-button" :class="{ 'is-active': pageType === 'home' }" type="button" title="首页" @click="changePageType('home')">
 					<span class="header-page-icon icon-home"></span>
 				</button>
-				<button class="header-button" :class="{ 'is-active': pageType === 'user' }" type="button" title="个人页" @click="changePageType('user')">
+				<button v-if="!isDiypageTemplate" class="header-button" :class="{ 'is-active': pageType === 'user' }" type="button" title="个人页" @click="changePageType('user')">
 					<span class="header-page-icon icon-user"></span>
 				</button>
 			</div>
 
 			<div class="header-side header-actions">
-				<button class="header-button" type="button">预览</button>
-				<button class="header-button" type="button">保存</button>
+				<button class="header-button" type="button" :disabled="saving" @click="saveDecoratePage">{{ saving ? '保存中' : '保存' }}</button>
 			</div>
 		</div>
 
@@ -96,6 +95,45 @@
 						<div class="component-grid">
 							<div
 								v-for="item in userItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addUserComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
+						<div class="collapse-title">基础组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in homeItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addUserComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
+						<div class="collapse-title">商品组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in goodsItems"
+								:key="item.type"
+								class="component-item"
+								:class="{ 'is-active': currentType === item.type }"
+								@click="addUserComponent(item.type)"
+							>
+								<img :src="`/assets/decorate/${item.type}.png`" alt="" />
+								<span>{{ item.name }}</span>
+							</div>
+						</div>
+						<div class="collapse-title">图文组件</div>
+						<div class="component-grid">
+							<div
+								v-for="item in imageItems"
 								:key="item.type"
 								class="component-item"
 								:class="{ 'is-active': currentType === item.type }"
@@ -564,6 +602,266 @@
 											<div class="user-card-mobile-button">去绑定</div>
 										</div>
 									</div>
+									<div v-if="component.type === 'orderCard'" class="order-card-preview">
+										<img src="/assets/decorate/orderCardStyle.png" alt="" />
+									</div>
+									<div v-if="component.type === 'couponCard'" class="user-image-card-preview">
+										<img src="/assets/decorate/couponCardStyle.png" alt="" />
+									</div>
+									<div v-if="component.type === 'walletCard'" class="user-image-card-preview">
+										<img src="/assets/decorate/walletCardStyle.png" alt="" />
+									</div>
+									<div v-if="component.type === 'searchBlock'" class="search-block" :style="{ borderRadius: `${component.data.borderRadius}px` }">
+										<div class="search-placeholder">
+											<span class="search-icon"></span>
+											<span>{{ component.data.placeholder || '搜索商品' }}</span>
+										</div>
+										<div class="search-keywords">
+											<span v-for="(keyword, keywordIndex) in component.data.keywords" :key="keywordIndex" :style="{ color: keyword.color }">
+												{{ keyword.text }}
+											</span>
+										</div>
+									</div>
+									<div v-if="component.type === 'noticeBlock'" class="notice-block">
+										<img :src="assetUrl(component.data.src)" alt="" />
+										<div class="notice-divider"></div>
+										<div class="notice-text" :style="{ color: component.data.title.color }">
+											{{ component.data.title.text || '请输入公告内容' }}
+										</div>
+									</div>
+									<div v-if="component.type === 'menuButton'" class="menu-button">
+										<template v-for="(item, menuIndex) in component.data.list" :key="menuIndex">
+											<div v-if="menuIndex < component.data.row * component.data.col" class="menu-button-item" :style="{ width: `${100 / component.data.col}%` }">
+												<div v-if="item.badge.show" class="menu-badge" :style="{ background: item.badge.bgColor, color: item.badge.color }">
+													{{ item.badge.text }}
+												</div>
+												<img v-if="item.src" :src="assetUrl(item.src)" alt="" />
+												<div v-else class="menu-image-placeholder"></div>
+												<div v-if="component.data.layout === 1" class="menu-title" :style="{ color: item.title.color }">
+													{{ item.title.text }}
+												</div>
+											</div>
+										</template>
+										<div v-if="component.data.list.length > component.data.row * component.data.col" class="menu-indicator">
+											<span></span><span></span>
+										</div>
+									</div>
+									<div v-if="component.type === 'menuList'" class="menu-list">
+										<div v-for="(item, menuIndex) in component.data.list" :key="menuIndex" class="menu-list-item">
+											<div class="menu-list-left">
+												<img v-if="item.src" :src="assetUrl(item.src)" alt="" />
+												<div class="menu-list-title" :style="{ color: item.title.color }">{{ item.title.text }}</div>
+											</div>
+											<div class="menu-list-right">
+												<div class="menu-list-tip" :style="{ color: item.tip.color }">{{ item.tip.text }}</div>
+												<span class="menu-list-arrow">›</span>
+											</div>
+										</div>
+									</div>
+									<div v-if="component.type === 'menuGrid'" class="menu-grid">
+										<div v-for="(item, gridIndex) in component.data.list" :key="gridIndex" class="menu-grid-item" :style="{ width: `${100 / component.data.col}%` }">
+											<div v-if="item.badge.show" class="menu-badge grid-badge" :style="{ background: item.badge.bgColor, color: item.badge.color }">
+												{{ item.badge.text }}
+											</div>
+											<img v-if="item.src" :src="assetUrl(item.src)" alt="" />
+											<div v-else class="menu-grid-image-placeholder"></div>
+											<div class="menu-grid-title" :style="{ color: item.title.color }">{{ item.title.text }}</div>
+											<div class="menu-grid-tip" :style="{ color: item.tip.color }">{{ item.tip.text }}</div>
+										</div>
+									</div>
+									<div v-if="component.type === 'goodsCard'" class="goods-card-preview">
+										<div class="goods-card-wrap" :class="`goods-card-${component.data.mode}`" :style="{ margin: `-${component.data.space / 2}px` }">
+											<div
+												v-for="goods in component.data.goodsList"
+												:key="goods.id"
+												class="goods-card-item"
+												:style="{ width: goodsCardWidth(component.data.mode), padding: `${component.data.space / 2}px` }"
+											>
+												<div
+													class="goods-card-inner"
+													:style="{
+														borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+														borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+														borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+														borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+													}"
+												>
+													<div v-if="component.data.tagStyle.show && component.data.tagStyle.src" class="goods-tag">
+														<img :src="assetUrl(component.data.tagStyle.src)" alt="" />
+													</div>
+													<img v-if="goods.image" class="goods-image" :src="assetUrl(goods.image)" alt="" />
+													<div v-else class="goods-image goods-image-empty">暂无图片</div>
+													<div class="goods-desc">
+														<div v-if="component.data.goodsFields.title.show" class="goods-title" :style="{ color: component.data.goodsFields.title.color }">{{ goods.title }}</div>
+														<div v-if="component.data.goodsFields.subtitle.show" class="goods-subtitle" :style="{ color: component.data.goodsFields.subtitle.color }">{{ goods.subtitle }}</div>
+														<div class="goods-price-row">
+															<div v-if="component.data.goodsFields.price.show" class="goods-price" :style="{ color: component.data.goodsFields.price.color }">¥{{ formatGoodsPrice(goods.price) }}</div>
+															<s v-if="component.data.goodsFields.original_price.show" class="goods-original-price" :style="{ color: component.data.goodsFields.original_price.color }">¥{{ formatGoodsPrice(goods.original_price) }}</s>
+														</div>
+														<div v-if="component.data.goodsFields.sales.show" class="goods-sales" :style="{ color: component.data.goodsFields.sales.color }">已售{{ goods.sales || 0 }}件</div>
+													</div>
+													<div class="goods-buy-button" :style="buyButtonStyle(component)">
+														<img v-if="component.data.buyNowStyle.mode === 2 && component.data.buyNowStyle.src" :src="assetUrl(component.data.buyNowStyle.src)" alt="" />
+														<span v-else>{{ component.data.buyNowStyle.text }}</span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div v-if="!component.data.goodsList.length" class="goods-empty">请选择商品</div>
+									</div>
+									<div v-if="component.type === 'goodsShelves'" class="goods-shelves-preview">
+										<div
+											class="goods-shelves-wrap"
+											:class="`goods-shelves-${component.data.mode}`"
+											:style="{
+												margin: `-${component.data.space / 2}px`,
+												flexWrap: component.data.mode === 3 ? 'nowrap' : 'wrap',
+											}"
+										>
+											<div
+												v-for="goods in component.data.goodsList"
+												:key="goods.id"
+												class="goods-shelves-item"
+												:style="{ width: goodsShelvesWidth(component.data.mode), padding: `${component.data.space / 2}px` }"
+											>
+												<div
+													class="goods-shelves-inner"
+													:style="{
+														borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+														borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+														borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+														borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+													}"
+												>
+													<div v-if="component.data.tagStyle.show && component.data.tagStyle.src" class="goods-tag">
+														<img :src="assetUrl(component.data.tagStyle.src)" alt="" />
+													</div>
+													<img v-if="goods.image" class="goods-shelves-image" :src="assetUrl(goods.image)" alt="" />
+													<div v-else class="goods-shelves-image goods-image-empty">暂无图片</div>
+													<div class="goods-shelves-desc">
+														<div v-if="component.data.goodsFields.title.show" class="goods-title" :style="{ color: component.data.goodsFields.title.color }">{{ goods.title }}</div>
+														<div v-if="component.data.goodsFields.price.show" class="goods-price" :style="{ color: component.data.goodsFields.price.color }">¥{{ formatGoodsPrice(goods.price) }}</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div v-if="!component.data.goodsList.length" class="goods-empty">请选择商品</div>
+									</div>
+									<div
+										v-if="component.type === 'imageBlock'"
+										class="image-block-preview"
+										:style="{
+											height: `${component.style.height}px`,
+											borderTopLeftRadius: `${component.data.borderRadiusTop}px`,
+											borderTopRightRadius: `${component.data.borderRadiusTop}px`,
+											borderBottomLeftRadius: `${component.data.borderRadiusBottom}px`,
+											borderBottomRightRadius: `${component.data.borderRadiusBottom}px`,
+										}"
+									>
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<div v-else class="image-placeholder">请上传图片</div>
+									</div>
+									<div v-if="component.type === 'imageBanner'" class="image-banner-preview">
+										<div class="image-banner-wrap" :style="{ margin: `-${component.data.space / 2}px` }">
+											<div
+												class="banner-item"
+												:style="{
+													padding: `${component.data.space / 2}px`,
+													height: `${component.style.height - component.style.padding}px`,
+												}"
+											>
+												<div class="banner-main" :style="imageBannerRadiusStyle(component)">
+													<img v-if="component.data.list[0]?.type === 'image' && component.data.list[0]?.src" :src="assetUrl(component.data.list[0].src)" alt="" />
+													<video v-else-if="component.data.list[0]?.type === 'video' && component.data.list[0]?.src" :poster="assetUrl(component.data.list[0].poster)" muted></video>
+													<div v-else class="image-placeholder">请添加图片</div>
+												</div>
+												<div v-if="component.data.mode === 2 && component.data.list[1]" class="banner-right" :style="imageBannerRadiusStyle(component)">
+													<img v-if="component.data.list[1].type === 'image' && component.data.list[1].src" :src="assetUrl(component.data.list[1].src)" alt="" />
+													<video v-else-if="component.data.list[1].type === 'video' && component.data.list[1].src" :poster="assetUrl(component.data.list[1].poster)" muted></video>
+													<div v-else class="image-placeholder">请上传图片</div>
+												</div>
+												<div class="banner-indicator" :class="`indicator-${component.data.indicator}`">
+													<span></span><span></span><span></span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div v-if="component.type === 'titleBlock'" class="title-block-preview" :style="{ height: `${component.style.height}px` }">
+										<div
+											class="title-block-content"
+											:style="{
+												alignItems: component.data.location === 'center' ? 'center' : 'flex-start',
+												marginLeft: `${component.data.skew}px`,
+											}"
+										>
+											<div
+												class="title-block-title"
+												:style="{
+													fontSize: `${component.data.title.textFontSize}px`,
+													color: component.data.title.color,
+													fontWeight: component.data.title.other.includes('bold') ? 'bold' : '',
+													fontStyle: component.data.title.other.includes('italic') ? 'italic' : '',
+												}"
+											>
+												{{ component.data.title.text }}
+											</div>
+											<div
+												class="title-block-subtitle"
+												:style="{
+													fontSize: `${component.data.subtitle.textFontSize}px`,
+													color: component.data.subtitle.color,
+													fontWeight: component.data.subtitle.other.includes('bold') ? 'bold' : '',
+													fontStyle: component.data.subtitle.other.includes('italic') ? 'italic' : '',
+												}"
+											>
+												{{ component.data.subtitle.text }}
+											</div>
+										</div>
+										<img class="title-block-bg" :src="assetUrl(component.data.src)" alt="" />
+										<div v-if="component.data.more.show" class="title-block-more">更多<span>›</span></div>
+									</div>
+									<div v-if="component.type === 'imageCube'" class="image-cube-preview">
+										<div class="image-cube-wrap" :style="imageCubeWrapStyle(component)">
+											<div
+												v-for="(item, cubeIndex) in component.data.list"
+												:key="cubeIndex"
+												class="image-cube-preview-item"
+												:style="imageCubeItemStyle(component, item)"
+											>
+												<img v-if="item.src" :src="assetUrl(item.src)" alt="" :style="imageCubeImageStyle(component)" />
+												<div v-else class="image-placeholder" :style="imageCubeImageStyle(component)">请上传图片</div>
+											</div>
+										</div>
+										<div v-if="!component.data.list.length" class="goods-empty">请添加魔方区域</div>
+									</div>
+									<div v-if="component.type === 'videoPlayer'" class="video-player-preview" :style="{ height: `${component.style.height}px` }">
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<video v-else-if="component.data.videoUrl" controls>
+											<source :src="assetUrl(component.data.videoUrl)" />
+										</video>
+										<div v-else class="image-placeholder">请设置视频链接或封面</div>
+									</div>
+									<div v-if="component.type === 'lineBlock'" class="line-block-preview">
+										<div
+											class="line-block-line"
+											:style="{
+												borderBottomStyle: component.data.mode,
+												borderBottomColor: component.data.lineColor,
+											}"
+										></div>
+									</div>
+									<div v-if="component.type === 'hotzone'" class="hotzone-preview">
+										<img v-if="component.data.src" :src="assetUrl(component.data.src)" alt="" />
+										<div v-else class="image-placeholder hotzone-empty">请上传热区图片</div>
+										<div
+											v-for="(item, hotIndex) in component.data.list"
+											:key="hotIndex"
+											class="hotzone-map-item"
+											:style="hotzonePreviewItemStyle(item)"
+										>
+											{{ item.name }}
+										</div>
+									</div>
 								</div>
 							</div>
 							<div v-if="!userComponents.length" class="empty-tip">从左侧添加组件</div>
@@ -578,7 +876,7 @@
 						<span>{{ currentTitle }}</span>
 					</div>
 					<el-radio-group v-model="activeTab" class="right-tab">
-						<el-radio-button label="data">内容</el-radio-button>
+						<el-radio-button v-show="availableTabs(currentType).includes('data')" label="data">内容</el-radio-button>
 						<el-radio-button
 							v-show="availableTabs(currentType).includes('style')"
 							label="style"
@@ -2142,7 +2440,7 @@
 						<pre v-else class="css-card">{{ JSON.stringify(selectedHomeComponent, null, 2) }}</pre>
 					</template>
 
-					<template v-else-if="currentType === 'userCard' && selectedUserComponent?.type === 'userCard'">
+					<template v-else-if="['userCard', 'orderCard', 'couponCard', 'walletCard'].includes(currentType) && selectedUserComponent">
 						<template v-if="activeTab === 'style'">
 							<div class="card">
 								<div class="title">组件样式</div>
@@ -2585,9 +2883,12 @@
 </template>
 
 <script setup lang="ts" name="ShopDecoratePage">
-import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { ElMessage } from "element-plus";
 import { useUserStore } from "@/pinia";
 import { ShopService } from "@/common/api/shop";
+import { DecorateService } from "@/common/api/decorate";
 
 const basicItems = [
 	{ name: "底部导航", type: "tabbar" },
@@ -2620,6 +2921,9 @@ const marketingItems = [
 ];
 const userItems = [
 	{ name: "会员卡片", type: "userCard" },
+	{ name: "订单卡片", type: "orderCard" },
+	{ name: "卡券卡片", type: "couponCard" },
+	{ name: "资产卡片", type: "walletCard" },
 ];
 const noticeImages = ["/assets/decorate/notice/1.png", "/assets/decorate/notice/2.png", "/assets/decorate/notice/3.png"];
 const titleBlockImages = ["/assets/decorate/title/1.png"];
@@ -2633,13 +2937,17 @@ const styleSliderFields: { key: keyof Pick<ComponentStyle, "marginTop" | "margin
 	{ key: "padding", label: "内间距", max: 60 },
 ];
 
+const route = useRoute();
 const pageType = ref<"basic" | "home" | "user">("basic");
 const currentType = ref("");
+const saving = ref(false);
+const templateType = ref(normalizeDecorateTemplateType(route.query.type));
+const isDiypageTemplate = computed(() => templateType.value === "diypage");
 const currentTitle = computed(() => {
 	const items = pageType.value === "home"
 		? [...homeItems, ...goodsItems, ...imageItems, ...marketingItems]
 		: pageType.value === "user"
-			? userItems
+			? [...userItems, ...homeItems, ...goodsItems, ...imageItems]
 			: basicItems;
 	return items.find(item => item.type === currentType.value)?.name || "页面设置";
 });
@@ -2665,6 +2973,9 @@ const componentTabs = reactive<Record<string, "data" | "style" | "css">>({
 	scoreGoods: "data",
 	coupon: "data",
 	userCard: "style",
+	orderCard: "style",
+	couponCard: "style",
+	walletCard: "style",
 });
 const goodsFieldList: { key: keyof GoodsCardFields; label: string }[] = [
 	{ key: "title", label: "商品标题" },
@@ -3134,8 +3445,28 @@ type UserCardComponent = {
 	style: ComponentStyle;
 };
 
+type OrderCardComponent = {
+	id: number;
+	type: "orderCard";
+	style: ComponentStyle;
+};
+
+type CouponCardComponent = {
+	id: number;
+	type: "couponCard";
+	style: ComponentStyle;
+};
+
+type WalletCardComponent = {
+	id: number;
+	type: "walletCard";
+	style: ComponentStyle;
+};
+
 type GoodsComponent = GoodsCardComponent | GoodsShelvesComponent;
-type UserComponent = UserCardComponent;
+type BasicUserComponent = SearchBlockComponent | NoticeBlockComponent | MenuButtonComponent | MenuListComponent | MenuGridComponent;
+type ImageUserComponent = ImageBlockComponent | ImageBannerComponent | TitleBlockComponent | ImageCubeComponent | VideoPlayerComponent | LineBlockComponent | HotzoneComponent;
+type UserComponent = UserCardComponent | OrderCardComponent | CouponCardComponent | WalletCardComponent | BasicUserComponent | GoodsComponent | ImageUserComponent;
 
 type HomeComponent = SearchBlockComponent | NoticeBlockComponent | MenuButtonComponent | MenuListComponent | MenuGridComponent | GoodsCardComponent | GoodsShelvesComponent | ImageBlockComponent | ImageBannerComponent | TitleBlockComponent | ImageCubeComponent | VideoPlayerComponent | LineBlockComponent | HotzoneComponent | ScoreGoodsComponent | CouponComponent;
 type DecorateComponent = HomeComponent | UserComponent;
@@ -3196,7 +3527,12 @@ const hotzoneMapRef = ref<HTMLElement | null>(null);
 let hotzonePointerState: HotzonePointerState | null = null;
 let componentId = 1;
 
-const selectedHomeComponent = computed(() => {
+const selectedHomeComponent = computed<HomeComponent | undefined>(() => {
+	if (pageType.value === "user") {
+		const component = userComponents[currentUserIndex.value];
+		const sharedItems = [...homeItems, ...goodsItems, ...imageItems];
+		return component && sharedItems.some(item => item.type === component.type) ? (component as HomeComponent) : undefined;
+	}
 	return homeComponents[currentHomeIndex.value];
 });
 const selectedUserComponent = computed(() => {
@@ -3228,7 +3564,15 @@ const filteredScoreGoodsOptions = computed(() => {
 	return scoreGoodsOptions.value.filter(item => item.title.toLowerCase().includes(keyword));
 });
 
+function normalizeDecorateTemplateType(type: unknown) {
+	const value = Array.isArray(type) ? type[0] : type;
+	return value === "diypage" || value === 2 || value === "2" ? "diypage" : "template";
+}
+
 function changePageType(type: "basic" | "home" | "user") {
+	if (isDiypageTemplate.value && type !== "home") {
+		type = "home";
+	}
 	pageType.value = type;
 	activeTab.value = "data";
 	if (type === "basic") {
@@ -3261,12 +3605,13 @@ function selectBasicItem(type: string) {
 
 function availableTabs(type: string) {
 	if (!type) return ["data", "css"];
-	if (type === "userCard") return ["style", "css"];
+	if (["userCard", "orderCard", "couponCard", "walletCard"].includes(type)) return ["style", "css"];
 	return ["floatMenu", "popupImage"].includes(type) ? ["data", "css"] : ["data", "style", "css"];
 }
 
 function normalizeTab(type: string, tab: "data" | "style" | "css" = "data") {
-	return availableTabs(type).includes(tab) ? tab : "data";
+	const tabs = availableTabs(type);
+	return tabs.includes(tab) ? tab : tabs[0];
 }
 
 watch(activeTab, tab => {
@@ -3659,6 +4004,46 @@ function createScoreGoods(): ScoreGoodsComponent {
 	};
 }
 
+function createUserCard(): UserCardComponent {
+	const style = createComponentStyle();
+	style.height = 0;
+	return {
+		id: componentId++,
+		type: "userCard",
+		style,
+	};
+}
+
+function createOrderCard(): OrderCardComponent {
+	const style = createComponentStyle();
+	style.height = 0;
+	return {
+		id: componentId++,
+		type: "orderCard",
+		style,
+	};
+}
+
+function createCouponCard(): CouponCardComponent {
+	const style = createComponentStyle();
+	style.height = 0;
+	return {
+		id: componentId++,
+		type: "couponCard",
+		style,
+	};
+}
+
+function createWalletCard(): WalletCardComponent {
+	const style = createComponentStyle();
+	style.height = 0;
+	return {
+		id: componentId++,
+		type: "walletCard",
+		style,
+	};
+}
+
 function addHomeComponent(type: string) {
 	const componentMap: Record<string, () => HomeComponent> = {
 		searchBlock: createSearchBlock,
@@ -3684,7 +4069,47 @@ function addHomeComponent(type: string) {
 	selectHomeComponent(homeComponents.length - 1);
 }
 
+function addUserComponent(type: string) {
+	const componentMap: Record<string, () => UserComponent> = {
+		userCard: createUserCard,
+		orderCard: createOrderCard,
+		couponCard: createCouponCard,
+		walletCard: createWalletCard,
+		searchBlock: createSearchBlock,
+		noticeBlock: createNoticeBlock,
+		menuButton: createMenuButton,
+		menuList: createMenuList,
+		menuGrid: createMenuGrid,
+		goodsCard: createGoodsCard,
+		goodsShelves: createGoodsShelves,
+		imageBlock: createImageBlock,
+		imageBanner: createImageBanner,
+		titleBlock: createTitleBlock,
+		imageCube: createImageCube,
+		videoPlayer: createVideoPlayer,
+		lineBlock: createLineBlock,
+		hotzone: createHotzone,
+	};
+	if (type === "userCard" && userComponents.some(item => item.type === "userCard")) {
+		selectUserComponent(userComponents.findIndex(item => item.type === "userCard"));
+		return;
+	}
+	const component = componentMap[type]?.();
+	if (!component) return;
+	if (component.type === "userCard") {
+		userComponents.unshift(component);
+		selectUserComponent(0);
+		return;
+	}
+	userComponents.push(component);
+	selectUserComponent(userComponents.length - 1);
+}
+
 function cloneHomeComponent(component: HomeComponent): HomeComponent {
+	return JSON.parse(JSON.stringify({ ...component, id: componentId++ }));
+}
+
+function cloneUserComponent(component: UserComponent): UserComponent {
 	return JSON.parse(JSON.stringify({ ...component, id: componentId++ }));
 }
 
@@ -3694,6 +4119,14 @@ function selectHomeComponent(index: number) {
 	currentHomeIndex.value = index;
 	currentType.value = component.type;
 	activeTab.value = normalizeTab(component.type, componentTabs[component.type] || "data");
+}
+
+function selectUserComponent(index: number) {
+	const component = userComponents[index];
+	if (!component) return;
+	currentUserIndex.value = index;
+	currentType.value = component.type;
+	activeTab.value = normalizeTab(component.type, componentTabs[component.type] || "style");
 }
 
 function moveHomeComponent(index: number, offset: number) {
@@ -3722,11 +4155,39 @@ function removeHomeComponent(index: number) {
 	selectHomeComponent(Math.min(index, homeComponents.length - 1));
 }
 
-function componentLabel(type: string) {
-	return [...homeItems, ...goodsItems, ...imageItems].find(item => item.type === type)?.name || type;
+function moveUserComponent(index: number, offset: number) {
+	const nextIndex = index + offset;
+	if (nextIndex < 0 || nextIndex >= userComponents.length) return;
+	if (userComponents[index]?.type === "userCard" || userComponents[nextIndex]?.type === "userCard") return;
+	const [component] = userComponents.splice(index, 1);
+	userComponents.splice(nextIndex, 0, component);
+	selectUserComponent(nextIndex);
 }
 
-function componentWrapStyle(component: HomeComponent) {
+function copyUserComponent(index: number) {
+	const component = userComponents[index];
+	if (!component || component.type === "userCard") return;
+	userComponents.splice(index + 1, 0, cloneUserComponent(component));
+	selectUserComponent(index + 1);
+}
+
+function removeUserComponent(index: number) {
+	if (userComponents[index]?.type === "userCard") return;
+	userComponents.splice(index, 1);
+	if (!userComponents.length) {
+		currentUserIndex.value = -1;
+		currentType.value = "";
+		activeTab.value = "style";
+		return;
+	}
+	selectUserComponent(Math.min(index, userComponents.length - 1));
+}
+
+function componentLabel(type: string) {
+	return [...homeItems, ...goodsItems, ...imageItems, ...marketingItems, ...userItems].find(item => item.type === type)?.name || type;
+}
+
+function componentWrapStyle(component: DecorateComponent) {
 	const style = component.style;
 	return {
 		backgroundColor: style.background.type === "color" ? style.background.bgColor : "",
@@ -4161,6 +4622,155 @@ function saveHotzoneDialog() {
 	hotzoneDialogVisible.value = false;
 }
 
+function clonePlain<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value));
+}
+
+function routeNumber(value: unknown) {
+	const raw = Array.isArray(value) ? value[0] : value;
+	const numberValue = Number(raw);
+	return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function decoratePageId() {
+	return routeNumber(route.query.id ?? route.params.id);
+}
+
+function buildBasicPageData() {
+	return {
+		tabbar: clonePlain(tabbar),
+		floatMenu: clonePlain(floatMenu),
+		popupImage: clonePlain(popupImage),
+	};
+}
+
+function buildHomePageData() {
+	return {
+		data: clonePlain(homeComponents),
+		style: {},
+	};
+}
+
+function buildUserPageData() {
+	return {
+		data: clonePlain(userComponents),
+		style: {},
+	};
+}
+
+async function saveDecoratePage() {
+	if (saving.value) return;
+	const id = decoratePageId();
+	if (!id) {
+		ElMessage.error("缺少模板ID，无法保存装修数据");
+		return;
+	}
+	saving.value = true;
+	try {
+		if (isDiypageTemplate.value) {
+			await DecorateService.savePage({ id, type: "diypage", page: JSON.stringify(buildHomePageData()) });
+			ElMessage.success("保存成功");
+			return;
+		}
+		await Promise.all([
+			DecorateService.savePage({ id, type: "basic", page: JSON.stringify(buildBasicPageData()) }),
+			DecorateService.savePage({ id, type: "home", page: JSON.stringify(buildHomePageData()) }),
+			DecorateService.savePage({ id, type: "user", page: JSON.stringify(buildUserPageData()) }),
+		]);
+		ElMessage.success("保存成功");
+	} catch (error: any) {
+		ElMessage.error(error?.message || "保存失败");
+	} finally {
+		saving.value = false;
+	}
+}
+
+function parseSavedPage(page: unknown) {
+	if (!page) return null;
+	if (typeof page === "string") {
+		try {
+			return JSON.parse(page);
+		} catch {
+			return null;
+		}
+	}
+	return page;
+}
+
+function unwrapSavedPageData(page: any, key: string) {
+	const parsed = parseSavedPage(page);
+	if (!parsed || typeof parsed !== "object") return null;
+	if (parsed[key]) return parseSavedPage(parsed[key]);
+	if (parsed.page) return unwrapSavedPageData(parsed.page, key);
+	if (parsed.data && !Array.isArray(parsed.data) && typeof parsed.data === "object") return parsed.data;
+	return parsed;
+}
+
+function resetComponentIds(list: DecorateComponent[]) {
+	list.forEach(component => {
+		component.id = componentId++;
+	});
+}
+
+function applyBasicPageData(page: any) {
+	const basicPage = unwrapSavedPageData(page, "basic");
+	if (!basicPage || typeof basicPage !== "object") return;
+	if (basicPage.tabbar) Object.assign(tabbar, basicPage.tabbar);
+	if (basicPage.floatMenu) Object.assign(floatMenu, basicPage.floatMenu);
+	if (basicPage.popupImage) Object.assign(popupImage, basicPage.popupImage);
+}
+
+function applyHomePageData(page: any) {
+	const homePage = unwrapSavedPageData(page, "home");
+	const list = Array.isArray(homePage?.data) ? homePage.data : Array.isArray(homePage) ? homePage : [];
+	homeComponents.splice(0, homeComponents.length, ...clonePlain(list));
+	resetComponentIds(homeComponents as DecorateComponent[]);
+	currentHomeIndex.value = homeComponents.length ? 0 : -1;
+}
+
+function applyUserPageData(page: any) {
+	const userPage = unwrapSavedPageData(page, "user");
+	const list = Array.isArray(userPage?.data) ? userPage.data : Array.isArray(userPage) ? userPage : [];
+	userComponents.splice(0, userComponents.length, ...clonePlain(list));
+	resetComponentIds(userComponents as DecorateComponent[]);
+	currentUserIndex.value = userComponents.length ? 0 : -1;
+}
+
+async function loadDecoratePage() {
+	const id = decoratePageId();
+	if (!id) return;
+	try {
+		const templateRes = await DecorateService.getTemplateDetail(id);
+		templateType.value = normalizeDecorateTemplateType(templateRes.data?.type ?? route.query.type);
+		if (isDiypageTemplate.value) {
+			pageType.value = "home";
+			const res = await DecorateService.getPageDetail({ id, type: "diypage" });
+			applyHomePageData(parseSavedPage(res.data?.page));
+			const component = selectedHomeComponent.value;
+			currentType.value = component?.type || "";
+			activeTab.value = currentType.value ? normalizeTab(currentType.value, componentTabs[currentType.value] || "data") : "data";
+			return;
+		}
+		const [basicRes, homeRes, userRes] = await Promise.all([
+			DecorateService.getPageDetail({ id, type: "basic" }),
+			DecorateService.getPageDetail({ id, type: "home" }),
+			DecorateService.getPageDetail({ id, type: "user" }),
+		]);
+		applyBasicPageData(parseSavedPage(basicRes.data?.page));
+		applyHomePageData(parseSavedPage(homeRes.data?.page));
+		applyUserPageData(parseSavedPage(userRes.data?.page));
+		if (pageType.value === "basic" && !currentType.value) {
+			selectBasicItem("tabbar");
+		}
+	} catch (error: any) {
+		ElMessage.error(error?.message || "装修数据加载失败");
+	}
+}
+
+onMounted(() => {
+	loadDecoratePage();
+});
+
 onBeforeUnmount(() => {
 	stopHotzonePointer();
 });
@@ -4365,6 +4975,15 @@ async function uploadPopupImage(event: Event, item: PopupImageItem) {
 }
 
 async function uploadHomeBackground(event: Event, component: HomeComponent) {
+	const input = event.target as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+	const url = await uploadFile(file);
+	if (url) component.style.background.bgImage = url;
+	input.value = "";
+}
+
+async function uploadUserBackground(event: Event, component: UserComponent) {
 	const input = event.target as HTMLInputElement;
 	const file = input.files?.[0];
 	if (!file) return;
@@ -4701,7 +5320,7 @@ async function uploadBackgroundImage(event: Event) {
 }
 
 .left {
-	width: 260px;
+	width: 270px;
 }
 
 .right {
@@ -5554,6 +6173,78 @@ async function uploadBackgroundImage(event: Event) {
 .hotzone-edit-item.is-active {
 	box-shadow: inset 0 0 0 1px var(--el-color-primary);
 	background: rgb(64 158 255 / 20%);
+}
+
+.user-card-preview {
+	background: transparent;
+}
+
+.user-card-main {
+	padding: 24px 18px 10px;
+	display: flex;
+	align-items: center;
+}
+
+.user-card-avatar {
+	width: 60px;
+	height: 60px;
+	margin-right: 16px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.user-card-info {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-width: 0;
+}
+
+.user-card-name {
+	font-size: 18px;
+	font-weight: bold;
+	color: #000;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.user-card-qrcode {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.user-card-mobile {
+	width: 100%;
+	height: 42px;
+	padding: 0 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #fff;
+	box-shadow: 0 8px 9px 0 rgba(224, 224, 224, 0.22);
+	color: #ff690d;
+	font-size: 12px;
+	box-sizing: border-box;
+}
+
+.user-card-mobile-button {
+	width: 52px;
+	height: 26px;
+	line-height: 26px;
+	text-align: center;
+	background: #ff6100;
+	border-radius: 26px;
+	color: #fff;
+	font-size: 12px;
+}
+
+.order-card-preview img,
+.user-image-card-preview img {
+	width: 100%;
+	display: block;
 }
 
 .coupon-preview {

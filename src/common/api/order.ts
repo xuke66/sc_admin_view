@@ -4,6 +4,15 @@ export const OrderService = {
 	async getOrderList(params?: Record<string, any>) {
 		return http.get<httpNs.Response>("/order/index", params || {});
 	},
+	async getCustomerGoods(params?: Record<string, any>) {
+		return http.get<httpNs.Response>("/order/customerGoods", params || {});
+	},
+	async getCustomerUsers(params?: Record<string, any>) {
+		return http.get<httpNs.Response>("/order/customerUsers", params || {});
+	},
+	async createCustomerOrder(param: any) {
+		return http.post<httpNs.Response>("/order/createCustomerOrder", param);
+	},
 	async getOrderDetail(id: number) {
 		return http.get<httpNs.Response>("/order/detail", { id });
 	},

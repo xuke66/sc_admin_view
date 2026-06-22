@@ -1,3 +1,5 @@
+import type { IDomEditor } from "@wangeditor/editor";
+
 export type ImageInsertFnType = (url: string, alt: string) => void;
 export type VideoInsertFnType = (url: string, poster: string) => void;
 export type FileInsertFnType = (fileName: string, url: string) => void;
@@ -48,7 +50,7 @@ export type WangEditorEmits = {
   /** 文件上传 */
   fileUpload: [file: File, insertFn: FileInsertFnType];
   /** 粘贴事件 */
-  onPaste: [editor: any, event: ClipboardEvent];
+  onPaste: [editor: IDomEditor, event: ClipboardEvent];
   /** 创建事件 */
-  onCreated: [editor: any];
+  onCreated: [editor: IDomEditor];
 };

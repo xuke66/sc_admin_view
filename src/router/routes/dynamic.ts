@@ -1,4 +1,4 @@
-import { Brush, Compass } from "@element-plus/icons-vue";
+import { Brush, Compass, ShoppingCart } from "@element-plus/icons-vue";
 import { HOME_NAME, HOME_URL } from "@/common/config";
 
 export const dynamicRoutes: RouterConfigRaw[] = [
@@ -20,7 +20,18 @@ export const dynamicRoutes: RouterConfigRaw[] = [
 		meta: {
 			title: "DIY 首页",
 			icon: Brush,
+			hideInMenu: true,
 			auths: ["decoratePage/detail", "decoratePage/edit"],
+		},
+	},
+	{
+		path: "/order/customer",
+		name: "OrderCustomer",
+		component: "/order/customer/index",
+		meta: {
+			title: "代客下单",
+			icon: ShoppingCart,
+			auths: ["order/customerGoods", "order/createCustomerOrder"],
 		},
 	},
 ];

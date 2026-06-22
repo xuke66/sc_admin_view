@@ -89,154 +89,166 @@
 		<el-dialog
 			v-model="dialogVisible"
 			:title="form.id ? '编辑优惠券' : '新增优惠券'"
-			width="920px"
+			width="980px"
+			top="5vh"
+			class="coupon-edit-dialog"
 			destroy-on-close
 			@closed="resetForm"
 		>
-			<el-form ref="formRef" :model="form" :rules="rules" label-width="92px" class="coupon-form">
-				<div class="form-grid">
-					<el-form-item label="券名称" prop="name">
-						<el-input v-model="form.name" placeholder="例如：国庆优惠券" class="wide-input" />
-					</el-form-item>
-					<el-form-item label="名称备注" prop="description">
-						<el-input v-model="form.description" placeholder="请输入名称备注" class="wide-input" />
-					</el-form-item>
-				</div>
+			<el-form ref="formRef" :model="form" :rules="rules" label-width="94px" class="coupon-form">
+				<div class="coupon-dialog-layout">
+					<div class="coupon-dialog-main">
+						<section class="coupon-section">
+							<div class="section-title">基础信息</div>
+							<div class="form-grid">
+								<el-form-item label="券名称" prop="name">
+									<el-input v-model="form.name" placeholder="例如：国庆优惠券" class="wide-input" />
+								</el-form-item>
+								<el-form-item label="名称备注" prop="description">
+									<el-input v-model="form.description" placeholder="请输入名称备注" class="wide-input" />
+								</el-form-item>
+							</div>
+							<el-form-item label="券类型" prop="type">
+								<el-radio-group v-model="form.type" class="radio-line">
+									<el-radio :value="1">满减券</el-radio>
+									<el-radio :value="2">折扣券</el-radio>
+								</el-radio-group>
+							</el-form-item>
+						</section>
 
-				<el-form-item label="券类型" prop="type">
-					<el-radio-group v-model="form.type">
-						<el-radio :value="1">满减券</el-radio>
-						<el-radio :value="2">折扣券</el-radio>
-					</el-radio-group>
-				</el-form-item>
+						<section class="coupon-section">
+							<div class="section-title">优惠规则</div>
+							<div class="rule-line">
+								<el-form-item label="优惠设置" prop="enough" class="rule-form-item">
+									<span class="rule-text">满</span>
+									<el-input-number v-model="form.enough" :controls="false" :min="0" class="mini-number" />
+								</el-form-item>
+								<el-form-item label=""  prop="amount" class="rule-form-item">
+									<span class="rule-text">{{ form.type === 1 ? "减" : "打" }}</span>
+									<el-input-number v-model="form.amount" :controls="false" :min="0" :max="form.type === 2 ? 10 : 999999" class="mini-number" />
+									<span class="rule-text">{{ form.type === 1 ? "元" : "折" }}</span>
+								</el-form-item>
+								<el-form-item v-if="form.type === 2" label="" prop="max_amount" class="rule-form-item">
+									<span class="rule-text">最多减</span>
+									<el-input-number v-model="form.max_amount" :controls="false" :min="0" class="mini-number" />
+									<span class="rule-text">元</span>
+								</el-form-item>
+							</div>
+							<div class="form-grid">
+								<el-form-item label="发券总量" prop="stock">
+									<div class="inline-item">
+										<el-input-number v-model="form.stock" :controls="false" :min="0" class="small-number" />
+										<span class="inline-text">张</span>
+									</div>
+								</el-form-item>
+								<el-form-item label="每人限领" prop="limit_num">
+									<div class="inline-item">
+										<el-input-number v-model="form.limit_num" :controls="false" :min="0" class="small-number" />
+										<span class="inline-text">张</span>
+									</div>
+								</el-form-item>
+							</div>
+						</section>
 
-				<div class="form-grid">
-					<el-form-item label="消费满" prop="enough">
-						<div class="inline-item">
-							<el-input-number v-model="form.enough" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">元</span>
-						</div>
-					</el-form-item>
-					<el-form-item :label="form.type === 1 ? '立减' : '折扣'" prop="amount">
-						<div class="inline-item">
-							<el-input-number v-model="form.amount" :controls="false" :min="0" :max="form.type === 2 ? 10 : 999999" class="small-number" />
-							<span class="inline-text">{{ form.type === 1 ? "元" : "折" }}</span>
-						</div>
-					</el-form-item>
-					<el-form-item v-if="form.type === 2" label="最多减" prop="max_amount">
-						<div class="inline-item">
-							<el-input-number v-model="form.max_amount" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">元</span>
-						</div>
-					</el-form-item>
-				</div>
+						<section class="coupon-section">
+							<div class="section-title">时间设置</div>
+							<el-form-item label="领券时间" prop="receive_time">
+								<div style="width: 500px;">
+                                    <el-date-picker
+                                        v-model="receiveTimeRange"
+                                        type="datetimerange"
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        value-format="YYYY-MM-DD HH:mm:ss"
+                                        range-separator="至"
+                                    />
+                                </div>
+							</el-form-item>
+							<el-form-item label="券有效期" prop="use_time_type">
+								<el-radio-group v-model="form.use_time_type" class="radio-line">
+									<el-radio :value="2">相对天数</el-radio>
+									<el-radio :value="1">固定区间</el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<div v-if="form.use_time_type === 2" class="form-grid">
+								<el-form-item label="领取后" prop="start_days">
+									<div class="inline-item">
+										<el-input-number v-model="form.start_days" :controls="false" :min="0" class="small-number" />
+										<span class="inline-text">天后生效</span>
+									</div>
+								</el-form-item>
+								<el-form-item label="有效期" prop="days">
+									<div class="inline-item">
+										<el-input-number v-model="form.days" :controls="false" :min="0" class="small-number" />
+										<span class="inline-text">天</span>
+									</div>
+								</el-form-item>
+							</div>
+							<el-form-item v-else label="固定区间" prop="use_time_range">
+                                <div style="width: 500px;">
+								<el-date-picker
+									v-model="useTimeRange"
+									type="datetimerange"
+									start-placeholder="开始日期"
+									end-placeholder="结束日期"
+									value-format="YYYY-MM-DD HH:mm:ss"
+									range-separator="至"
+								/>
+                                </div>
+							</el-form-item>
+						</section>
 
-				<div class="form-grid">
-					<el-form-item label="发券总量" prop="stock">
-						<div class="inline-item">
-							<el-input-number v-model="form.stock" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">张</span>
-						</div>
-					</el-form-item>
-					<el-form-item label="每人限领" prop="limit_num">
-						<div class="inline-item">
-							<el-input-number v-model="form.limit_num" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">张</span>
-						</div>
-					</el-form-item>
-				</div>
-
-				<el-form-item label="领券时间" prop="receive_time">
-					<el-date-picker
-						v-model="receiveTimeRange"
-						type="datetimerange"
-						start-placeholder="开始日期"
-						end-placeholder="结束日期"
-						value-format="YYYY-MM-DD HH:mm:ss"
-						range-separator="至"
-						class="wide-picker"
-					/>
-				</el-form-item>
-
-				<el-form-item label="券有效期" prop="use_time_type">
-					<el-radio-group v-model="form.use_time_type">
-						<el-radio :value="2">相对天数</el-radio>
-						<el-radio :value="1">固定区间</el-radio>
-					</el-radio-group>
-				</el-form-item>
-
-				<div v-if="form.use_time_type === 2" class="form-grid">
-					<el-form-item label="领取后" prop="start_days">
-						<div class="inline-item">
-							<el-input-number v-model="form.start_days" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">天后生效</span>
-						</div>
-					</el-form-item>
-					<el-form-item label="有效期" prop="days">
-						<div class="inline-item">
-							<el-input-number v-model="form.days" :controls="false" :min="0" class="small-number" />
-							<span class="inline-text">天</span>
-						</div>
-					</el-form-item>
-				</div>
-				<el-form-item v-else label="固定区间" prop="use_time_range">
-					<el-date-picker
-						v-model="useTimeRange"
-						type="datetimerange"
-						start-placeholder="开始日期"
-						end-placeholder="结束日期"
-						value-format="YYYY-MM-DD HH:mm:ss"
-						range-separator="至"
-						class="wide-picker"
-					/>
-				</el-form-item>
-
-				<el-form-item label="优惠叠加" prop="is_superpose">
-					<div class="switch-row">
-						<el-switch v-model="form.is_superpose" :active-value="1" :inactive-value="0" />
-						<span>{{ form.is_superpose ? "开启" : "关闭" }}</span>
+						<section class="coupon-section">
+							<div class="section-title">使用设置</div>
+							<el-form-item label="优惠叠加" prop="is_superpose">
+								<div>
+									<div class="switch-row">
+										<el-switch v-model="form.is_superpose" :active-value="1" :inactive-value="0" />
+										<span>{{ form.is_superpose ? "开启" : "关闭" }}</span>
+									</div>
+									<div class="field-tip">开启后，优惠券可以和活动一起使用</div>
+								</div>
+							</el-form-item>
+							<el-form-item label="可用范围" prop="use_scope">
+								<el-radio-group v-model="form.use_scope" class="radio-line">
+									<el-radio :value="1">全场通用</el-radio>
+									<el-radio :value="2">指定商品可用</el-radio>
+									<el-radio :value="3">指定商品不可用</el-radio>
+									<el-radio :value="4">指定分类可用</el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<el-form-item v-if="form.use_scope === 2 || form.use_scope === 3" label="指定商品" prop="use_scope_ids">
+								<div class="scope-row">
+									<el-input :model-value="selectedGoodsSummary" readonly class="wide-input" />
+									<el-button type="primary" @click="openGoodsDialog">选择商品</el-button>
+								</div>
+							</el-form-item>
+							<el-form-item v-if="form.use_scope === 4" label="指定分类" prop="use_scope_ids">
+								<el-cascader
+									v-model="form.use_scope_ids"
+									:options="categoryOptions"
+									:props="categoryProps"
+									collapse-tags
+									collapse-tags-tooltip
+									clearable
+									class="wide-input"
+								/>
+							</el-form-item>
+							<el-form-item label="状态" prop="status">
+								<el-radio-group v-model="form.status" class="radio-line">
+									<el-radio :value="1">启用</el-radio>
+									<el-radio :value="0">禁用</el-radio>
+								</el-radio-group>
+							</el-form-item>
+						</section>
 					</div>
-					<div class="field-tip">开启优惠叠加，优惠券将可以和活动一起使用</div>
-				</el-form-item>
-
-				<el-form-item label="可用范围" prop="use_scope">
-					<el-radio-group v-model="form.use_scope">
-						<el-radio :value="1">全场通用</el-radio>
-						<el-radio :value="2">指定商品可用</el-radio>
-						<el-radio :value="3">指定商品不可用</el-radio>
-						<el-radio :value="4">指定分类可用</el-radio>
-					</el-radio-group>
-				</el-form-item>
-
-				<el-form-item v-if="form.use_scope === 2 || form.use_scope === 3" label="指定商品" prop="use_scope_ids">
-					<div class="scope-row">
-						<el-input :model-value="selectedGoodsSummary" readonly class="wide-input" />
-						<el-button type="primary" @click="openGoodsDialog">选择商品</el-button>
-					</div>
-				</el-form-item>
-
-				<el-form-item v-if="form.use_scope === 4" label="指定分类" prop="use_scope_ids">
-					<el-cascader
-						v-model="form.use_scope_ids"
-						:options="categoryOptions"
-						:props="categoryProps"
-						collapse-tags
-						collapse-tags-tooltip
-						clearable
-						class="wide-input"
-					/>
-				</el-form-item>
-
-				<el-form-item label="状态" prop="status">
-					<el-radio-group v-model="form.status">
-						<el-radio :value="1">启用</el-radio>
-						<el-radio :value="0">禁用</el-radio>
-					</el-radio-group>
-				</el-form-item>
+				</div>
 			</el-form>
 			<template #footer>
-				<el-button @click="dialogVisible = false">取消</el-button>
-				<el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+				<div class="coupon-dialog-footer">
+					<el-button @click="dialogVisible = false">取消</el-button>
+					<el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+				</div>
 			</template>
 		</el-dialog>
 
@@ -699,27 +711,100 @@ onMounted(async () => {
 	justify-content: center;
 }
 
+.coupon-edit-dialog {
+	:deep(.el-dialog__header) {
+		padding: 18px 22px 14px;
+		margin-right: 0;
+		border-bottom: 1px solid var(--el-border-color-lighter);
+	}
+
+	:deep(.el-dialog__body) {
+		max-height: calc(90vh - 128px);
+		padding: 18px 22px 8px;
+		overflow-y: auto;
+		background: #fafafa;
+	}
+
+	:deep(.el-dialog__footer) {
+		padding: 14px 22px 18px;
+		border-top: 1px solid var(--el-border-color-lighter);
+	}
+}
+
 .coupon-form {
-	padding-right: 12px;
+	:deep(.el-form-item) {
+		margin-bottom: 18px;
+	}
+
+	:deep(.el-form-item__label) {
+		font-weight: 500;
+		color: var(--el-text-color-regular);
+	}
+}
+
+.coupon-dialog-layout,
+.coupon-dialog-main {
+	width: 100%;
+}
+
+.coupon-dialog-main {
+	display: grid;
+	gap: 14px;
+}
+
+.coupon-section {
+	padding: 16px 16px 0;
+	background: var(--el-bg-color);
+	border: 1px solid var(--el-border-color-lighter);
+	border-radius: 8px;
+}
+
+.section-title {
+	position: relative;
+	padding-left: 10px;
+	margin-bottom: 14px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	color: var(--el-text-color-primary);
+
+	&::before {
+		position: absolute;
+		top: 1px;
+		left: 0;
+		width: 3px;
+		height: 14px;
+		content: "";
+		background: var(--el-color-primary);
+		border-radius: 2px;
+	}
 }
 
 .form-grid {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	column-gap: 24px;
+	grid-template-columns: 1fr;
+}
+
+.form-grid.is-three {
+	grid-template-columns: 1fr;
 }
 
 .wide-input {
-	width: 360px;
+	width: 320px;
+	max-width: 100%;
 }
 
-.wide-picker {
-	width: 400px;
+
+.radio-line {
+	display: flex;
+	flex-wrap: wrap;
+	row-gap: 8px;
 }
 
 .inline-item {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
+	width: 100%;
 	gap: 8px;
 }
 
@@ -728,7 +813,38 @@ onMounted(async () => {
 }
 
 .small-number {
-	width: 120px;
+	width: 110px;
+}
+
+.rule-line {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.rule-form-item {
+	display: inline-flex;
+	margin-right: 6px;
+	vertical-align: top;
+
+	:deep(.el-form-item__content) {
+		display: inline-flex;
+		flex-wrap: nowrap;
+		align-items: center;
+		gap: 6px;
+		margin-left: 0 !important;
+	}
+}
+
+.rule-text {
+	display: inline-flex;
+	align-items: center;
+	height: 32px;
+	color: var(--el-text-color-regular);
+	white-space: nowrap;
+}
+
+.mini-number {
+	width: 60px;
 }
 
 .switch-row {
@@ -744,9 +860,17 @@ onMounted(async () => {
 }
 
 .scope-row {
-	display: inline-flex;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	gap: 12px;
+	width: 100%;
+	gap: 10px;
+}
+
+.coupon-dialog-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
 }
 
 .dialog-toolbar {
@@ -804,7 +928,8 @@ onMounted(async () => {
 }
 
 @media (max-width: 1200px) {
-	.form-grid {
+	.form-grid,
+	.form-grid.is-three {
 		grid-template-columns: 1fr;
 	}
 }
